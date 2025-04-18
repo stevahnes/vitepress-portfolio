@@ -1,0 +1,19 @@
+{
+  "name": "stevanus-satria",
+  "description": "Stevanus Satria's Personal Website",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:update-package": "npx vp-update",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.4",
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.8.3",
+    "vitepress": "^1.6.3",
+    "vue": "^3.5.13"
+  }
+}

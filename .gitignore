@@ -1,0 +1,33 @@
+# Node modules and logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+docs/.vitepress/dist/
+docs/.vitepress/cache/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# Optional: local environment files
+.env
+.env.local
+.env.*.local
+
+# Mac/Linux swap files
+*.swp
+*.swo
+
+# Windows hidden files
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Tailwind cache (optional)
+.tailwind*
