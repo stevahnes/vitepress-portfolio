@@ -4,6 +4,8 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
+    "lint": "eslint --fix docs",
+    "format": "prettier .  --write",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:update-package": "npx vp-update",
@@ -11,8 +13,10 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.4",
+    "sharp": "^0.34.1",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
+    "vite-plugin-image-optimizer": "^1.1.8",
     "vitepress": "^1.6.3",
     "vue": "^3.5.13"
   }

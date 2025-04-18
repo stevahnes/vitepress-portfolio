@@ -1,12 +1,13 @@
 import { defineConfig } from "vitepress";
 import tailwindcss from "@tailwindcss/vite";
+import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "Stevanus Satria",
   description: "Stevanus Satria's Personal Website",
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
+    logo: "../public/small-logo-white-circle-bg.png",
     nav: [
       { text: "Home", link: "/" },
       { text: "About", link: "/about" },
@@ -20,6 +21,6 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [tailwindcss(), ViteImageOptimizer()],
   },
 });
