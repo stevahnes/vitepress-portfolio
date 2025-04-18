@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
-    "lint": "eslint --fix docs",
+    "lint": "eslint --fix",
     "format": "prettier .  --write",
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
@@ -13,6 +13,10 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.4",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-vue": "^10.0.0",
+    "prettier": "3.5.3",
     "sharp": "^0.34.1",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
