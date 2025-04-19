@@ -10,10 +10,47 @@ export default defineConfig({
     logo: "/small-logo-white-circle-bg.png",
     nav: [
       { text: "Home", link: "/" },
-      { text: "Contact", link: "mailto:me@stevanussatria.com" },
+      { text: "Projects", link: "/projects" },
+      { text: "Milestones", link: "/milestones" },
+      { text: "Recommendations", link: "/recommendations" },
+      { text: "Stack", link: "/stack" },
+      { text: "Gear", link: "/gear" },
     ],
 
-    sidebar: [{ text: "Home", items: [] }],
+    sidebar: {
+      "/projects": [
+        {
+          text: "Projects",
+          link: "/projects",
+          items: [
+            { text: "One", link: "/projects/one" },
+            { text: "Two", link: "/projects/two" },
+          ],
+        },
+      ],
+      "/milestones": [
+        {
+          text: "Milestones",
+          link: "/milestones",
+          items: [
+            { text: "2025", link: "/milestones#2025" },
+            { text: "2024", link: "/milestones#2024" },
+            { text: "2023", link: "/milestones#2023" },
+          ],
+        },
+      ],
+      "/recommendations": [
+        {
+          text: "Recommendations",
+          link: "/recommendations",
+          items: [
+            { text: "Workato", link: "/recommendations#workato" },
+            { text: "Shopee", link: "/recommendations#shopee" },
+            { text: "Amadeus", link: "/recommendations#amadeus" },
+          ],
+        },
+      ],
+    },
 
     socialLinks: [
       { icon: "linkedin", link: "https://www.linkedin.com/in/stevanussatria" },

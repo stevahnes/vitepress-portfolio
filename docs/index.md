@@ -16,15 +16,12 @@ hero:
       link: https://adplist.org/mentors/stevanus-satria
 
 features:
-  - icon: 🛠️
-    title: Stack
-    link: /stack
-  - icon: 📅
-    title: Timeline
-    link: /timeline
-  - icon: 👍
-    title: Recommendations
-    link: /recommendations
+  - title: ⌛ 7+
+    details: Years of Experience
+  - title: 💼 B2B
+    details: Primary Domain Expertise
+  - title: 🌐 SaaS
+    details: Primary Architecture Expertise
 ---
 
 ### Hi, I'm Steve 👋
