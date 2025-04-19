@@ -1,3 +1,0 @@
-# Writing
-
-Content coming soon.

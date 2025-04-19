@@ -1,3 +1,0 @@
-# Contact
-
-Content coming soon.

@@ -10,13 +10,20 @@ export default defineConfig({
     logo: "/small-logo-white-circle-bg.png",
     nav: [
       { text: "Home", link: "/" },
-      { text: "About", link: "/about" },
+      { text: "Contact", link: "mailto:me@stevanussatria.com" },
     ],
 
-    sidebar: [{ text: "About", items: [] }],
+    sidebar: [{ text: "Home", items: [] }],
 
     socialLinks: [
-      { icon: "github", link: "https://github.com/vuejs/vitepress" },
+      { icon: "linkedin", link: "https://www.linkedin.com/in/stevanussatria" },
+      { icon: "github", link: "https://github.com/stevahnes" },
+      { icon: "soundcloud", link: "https://soundcloud.com/stevanus-satria" },
+      {
+        icon: "researchgate",
+        link: "https://www.researchgate.net/profile/Stevanus-Satria",
+      },
+      { icon: "strava", link: "https://www.strava.com/athletes/18347400" },
     ],
   },
 
