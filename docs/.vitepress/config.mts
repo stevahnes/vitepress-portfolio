@@ -7,7 +7,7 @@ export default defineConfig({
   title: "Stevanus Satria",
   description: "Stevanus Satria's Personal Website",
   themeConfig: {
-    logo: "../public/small-logo-white-circle-bg.png",
+    logo: "/small-logo-white-circle-bg.png",
     nav: [
       { text: "Home", link: "/" },
       { text: "About", link: "/about" },
