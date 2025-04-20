@@ -2,7 +2,7 @@
   <ol class="relative border-s border-gray-200 dark:border-gray-700">
     <li
       v-for="item in props.items"
-      :key="item.year"
+      :key="item.time"
       class="list-none mb-10 ms-4"
     >
       <div
@@ -10,7 +10,7 @@
       ></div>
       <time
         class="mb-1 text-sm font-normal leading-none text-gray-400 dark:text-gray-500"
-        >{{ item.year }}</time
+        >{{ item.time }}</time
       >
       <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
         {{ item.title }}
@@ -24,11 +24,9 @@
 
 <script setup lang="ts">
 interface TimelineItem {
-  year: string;
+  time: string;
   title: string;
   description: string;
-  link: string;
-  path: string;
 }
 
 const props = withDefaults(

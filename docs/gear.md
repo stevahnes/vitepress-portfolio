@@ -2,10 +2,31 @@
 layout: home
 
 features:
-  - icon: { src: ./typescript.svg }
-    title: TypeScript
-  - icon: { src: ./angular.svg }
-    title: Angular
-  - icon: { src: ./html-5.svg }
-    title: HTML
+  - icon: { src: ./omega.webp }
+    title: Speedy
+    details: Omega Speedmaster Moonwatch Professional
+  - icon: { src: ./orient.png }
+    title: Bambino
+    details: Orient Bambino Small Seconds 38mm
+  - icon: { src: ./landyachtz.png }
+    title: G&T
+    details: Landyachtz Dinghy Gin & Tonic Cruiser
+  - icon: { dark: "./polygon-dark.png", light: "./polygon-light.png" }
+    title: Zephyr
+    details: 2014 Polygon Helios C4.0 | Shimano 105
+  - icon: { src: ./aftershock.webp }
+    title: Zoom
+    details: Aftershock | 5600X | RTX3060
+  - icon: { src: ./apple.webp }
+    title: Jean
+    details: iPhone 13 Pro Max
+  - icon: { src: ./google.webp }
+    title: Hey, Google!
+    details: Google Home Mini
+  - icon: { src: ./xiaomi.svg }
+    title: Mbak
+    details: Mi Robot Vacuum-Mop 2
+  - icon: { src: ./ewelink.png }
+    title: Switchy
+    details: eWeLink Sonoff Basic Switch
 ---

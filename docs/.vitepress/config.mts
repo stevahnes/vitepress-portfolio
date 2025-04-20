@@ -52,11 +52,7 @@ export default defineConfig({
         {
           text: "Milestones",
           link: "/milestones",
-          items: [
-            { text: "2025", link: "/milestones#2025" },
-            { text: "2024", link: "/milestones#2024" },
-            { text: "2023", link: "/milestones#2023" },
-          ],
+          items: [],
         },
       ],
       "/recommendations": [
@@ -64,9 +60,101 @@ export default defineConfig({
           text: "Recommendations",
           link: "/recommendations",
           items: [
-            { text: "Workato", link: "/recommendations#workato" },
-            { text: "Shopee", link: "/recommendations#shopee" },
-            { text: "Amadeus", link: "/recommendations#amadeus" },
+            {
+              text: "Workato",
+              link: "/recommendations#workato",
+              items: [
+                { text: "Chisin Ng", link: "/recommendations#chisin-ng" },
+                {
+                  text: "Swathi Asokraj",
+                  link: "/recommendations#swathi-asokraj",
+                },
+              ],
+            },
+            {
+              text: "Shopee",
+              link: "/recommendations#shopee",
+              items: [
+                {
+                  text: "Siyu (Henry) Tang",
+                  link: "/recommendations#siyu-henry-tang",
+                },
+                {
+                  text: "Joanne Tan",
+                  link: "/recommendations#joanne-tan",
+                },
+                {
+                  text: "Xiang Rong Ong",
+                  link: "/recommendations#xiang-rong-ong",
+                },
+                {
+                  text: "Laurinda Wu",
+                  link: "/recommendations#laurinda-wu",
+                },
+                {
+                  text: "Rachel Esther Chan",
+                  link: "/recommendations#rachel-esther-chan",
+                },
+              ],
+            },
+            {
+              text: "Amadeus",
+              link: "/recommendations#amadeus",
+              items: [
+                {
+                  text: "Gus Salamoun",
+                  link: "/recommendations#gus-salamoun",
+                },
+                {
+                  text: "Stephanie Tan",
+                  link: "/recommendations#stephanie-tan",
+                },
+                {
+                  text: "Jyolsna Elangovan",
+                  link: "/recommendations#jyolsna-elangovan",
+                },
+                {
+                  text: "Gwendolin Tan",
+                  link: "/recommendations#gwendolin-tan",
+                },
+                {
+                  text: "Jameel Shaik",
+                  link: "/recommendations#jameel-shaik",
+                },
+                {
+                  text: "Zeyao Liu",
+                  link: "/recommendations#zeyao-liu",
+                },
+                {
+                  text: "Satyaranjan Muduli",
+                  link: "/recommendations#satyaranjan-muduli",
+                },
+                {
+                  text: "Gopinath Gunanithi",
+                  link: "/recommendations#gopinath-gunanithi",
+                },
+                {
+                  text: "Thejashree Chandraiah",
+                  link: "/recommendations#thejashree-chandraiah",
+                },
+                {
+                  text: "Colin McKell-Redwood",
+                  link: "/recommendations#colin-mckell-redwood",
+                },
+              ],
+            },
+            {
+              text: "Works Applications",
+              link: "/recommendations#works-applications",
+              items: [{ text: "Ray Pan", link: "/recommendations#ray-pan" }],
+            },
+            {
+              text: "SUTD",
+              link: "/recommendations#sutd",
+              items: [
+                { text: "Harry Nguyen", link: "/recommendations#harry-nguyen" },
+              ],
+            },
           ],
         },
       ],
