@@ -18,6 +18,8 @@ features:
     title: Git
   - icon: { src: ./travis-ci.svg }
     title: Travis CI
+  - icon: { src: ./cloudflare.webp }
+    title: Cloudflare
   - icon: { src: ./netlify.svg }
     title: Netlify
   - icon: { src: ./vercel.svg }

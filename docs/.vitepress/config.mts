@@ -170,6 +170,10 @@ export default defineConfig({
       },
       { icon: "strava", link: "https://www.strava.com/athletes/18347400" },
     ],
+
+    footer: {
+      copyright: `Copyright © ${new Date().getFullYear()} Stevanus Satria | Powered by VitePress`,
+    },
   },
 
   vite: {
