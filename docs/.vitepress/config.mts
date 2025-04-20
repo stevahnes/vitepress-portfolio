@@ -6,8 +6,28 @@ import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 export default defineConfig({
   title: "Stevanus Satria",
   description: "Stevanus Satria's Personal Website",
+  head: [
+    [
+      "link",
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "32x32",
+        href: "/small-logo-white-circle-bg.png",
+      },
+    ],
+    [
+      "link",
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "16x16",
+        href: "/small-logo-white-circle-bg.png",
+      },
+    ],
+  ],
   themeConfig: {
-    logo: "/small-logo-white-circle-bg.png",
+    logo: "/small-logo-no-bg.png",
     nav: [
       { text: "Home", link: "/" },
       { text: "Projects", link: "/projects" },
