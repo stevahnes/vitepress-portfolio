@@ -1,5 +1,6 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+
+export default {
   content: [
     "./docs/.vuepress/**/*.{vue,js,ts,md}",
     "./docs/**/*.{vue,js,ts,md}",
@@ -14,4 +15,4 @@ module.exports = {
     },
   },
   plugins: [],
-};
+} satisfies Config;
