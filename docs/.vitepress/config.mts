@@ -45,7 +45,8 @@ export default defineConfig({
           items: [
             {
               text: "Portfolio (VitePress)",
-              link: "/projects/portfolio-vitepress",
+              link: "https://github.com/stevahnes/vitepress-portfolio",
+              target: "_blank",
             },
             {
               text: "Portfolio (WordPress)",
@@ -53,43 +54,53 @@ export default defineConfig({
             },
             {
               text: "Figma Plugins",
-              link: "/projects/figma-plugins",
+              link: "https://www.figma.com/@stevahnes",
+              target: "_blank",
             },
             {
               text: "BRÜ-ME",
-              link: "/projects/brume",
+              link: "https://youtu.be/ch4kpChdSHs",
+              target: "_blank",
             },
             {
               text: "Lumos",
-              link: "/projects/lumos",
+              link: "https://youtu.be/qXR_C5dezqM",
+              target: "_blank",
             },
             {
               text: "RoverBot",
-              link: "/projects/roverbot",
+              link: "https://youtu.be/VbQ1-GKdCEk",
+              target: "_blank",
             },
             {
               text: "ZOUBA",
-              link: "/projects/zouba",
+              link: "https://youtu.be/oQVsBJ_NuM8",
+              target: "_blank",
             },
             {
               text: "Mod-Bot",
-              link: "/projects/mod-bot",
+              link: "https://youtu.be/DdzkIislYo0",
+              target: "_blank",
             },
             {
               text: "SALAMANDER",
-              link: "/projects/salamander",
+              link: "https://youtu.be/3CECXdaeLnI",
+              target: "_blank",
             },
             {
               text: "Velox",
-              link: "/projects/velox",
+              link: "https://youtu.be/IPcm3R25azw",
+              target: "_blank",
             },
             {
               text: "Troll Kart",
-              link: "/projects/troll-kart",
+              link: "https://youtu.be/lIg7apmuWjo",
+              target: "_blank",
             },
             {
               text: "Quadwalker",
-              link: "/projects/quadwalker",
+              link: "https://youtu.be/xLcHc-iailM",
+              target: "_blank",
             },
           ],
         },
