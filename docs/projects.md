@@ -5,72 +5,72 @@ features:
   - icon:
       src: /vitepress.webp
     title: Portfolio (VitePress)
-    details: VitePress | Vercel | Cloudflare
+    details: Revamped personal website built using VitePress
     link: https://github.com/stevahnes/vitepress-portfolio
     target: _blank
   - icon:
       src: /wordpress.svg
     title: Portfolio (WordPress)
-    details: WordPress | JavaScript | Cloudflare
+    details: Long-running legacy personal website built on WordPress
     link: /projects/portfolio-wordpress
   - icon:
       src: /figma.webp
     title: Figma Plugins
-    details: HTML | CSS | TypeScript
+    details: Various plugins written in HTML, CSS, and TypeScript
     link: https://www.figma.com/@stevahnes
     target: _blank
   - icon:
       src: /brume.png
     title: BRÜ-ME
-    details: IoT | Automation | Basic Wiring
+    details: Made a cheap manual brewer semi-automatic
     link: https://youtu.be/ch4kpChdSHs
     target: _blank
   - icon:
       src: /longboard.png
     title: Lumos
-    details: 3D Modeling | 3D Printing | Basic Wiring
+    details: 3D-printed custom nose guard with headlight
     link: https://youtu.be/qXR_C5dezqM
     target: _blank
   - icon:
       src: /lego.png
     title: RoverBot
-    details: 3D Modeling | Rapid Prototyping | Arduino Programming
+    details: Arduino-based robot kit designed for workshop
     link: https://youtu.be/VbQ1-GKdCEk
     target: _blank
   - icon:
       src: /zouba.png
     title: ZOUBA
-    details: Rapid Prototyping | Power Electronics | Structures and Mechanics
+    details: Foldable electric scooter that fits into your backpack
     link: https://youtu.be/oQVsBJ_NuM8
     target: _blank
   - icon:
       src: /modbot.png
     title: Mod-Bot
-    details: 3D Modeling | Rapid Prototyping | Arduino Programming
+    details: Reconfigurable cleaning robot for maximum area coverage
     link: https://youtu.be/DdzkIislYo0
     target: _blank
   - icon:
       src: /salamander.webp
     title: SALAMANDER
-    details: Drivetrain Design | Waterproofing | Wireless Control
+    details: Portable amphibious spherical rolling robot designed for reconnaissance
     link: https://youtu.be/3CECXdaeLnI
     target: _blank
   - icon:
       src: /velox.png
     title: Velox
-    details: Power Electronics | 3D Modeling | Rapid Prototyping
+    details: Custom electric skateboard with 3D-printed motor mount
     link: https://youtu.be/IPcm3R25azw
     target: _blank
   - icon:
       src: /troll-kart.png
     title: Troll Kart
-    details: Power Electronics | 3D Modeling | Structures and Mechanics
+    details: DIY electric go-kart built during my exchange at MIT
     link: https://youtu.be/lIg7apmuWjo
     target: _blank
   - icon:
       src: /quadwalker.png
     title: Quadwalker
-    details: 3D Modeling | Rapid Prototyping | Circuits and Electronics
+    details: Motorized walking stick designed for ground contact at all times
     link: https://youtu.be/xLcHc-iailM
     target: _blank
 ---
