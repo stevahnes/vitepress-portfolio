@@ -2,6 +2,8 @@
 layout: home
 
 features:
+  - icon: { src: ./sql.png }
+    title: SQL
   - icon: { src: ./typescript.svg }
     title: TypeScript
   - icon: { src: ./angular.svg }
@@ -32,6 +34,8 @@ features:
     title: Github
   - icon: { src: ./vscode.png }
     title: Visual Studio Code
+  - icon: { src: ./snowflake.png }
+    title: Snowflake
   - icon: { src: ./jira.svg }
     title: Jira
   - icon: { src: ./confluence.svg }
