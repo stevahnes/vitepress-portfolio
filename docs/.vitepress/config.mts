@@ -38,13 +38,59 @@ export default defineConfig({
     ],
 
     sidebar: {
-      "/projects": [
+      "/projects/": [
         {
           text: "Projects",
           link: "/projects",
           items: [
-            { text: "One", link: "/projects/one" },
-            { text: "Two", link: "/projects/two" },
+            {
+              text: "Portfolio (VitePress)",
+              link: "/projects/portfolio-vitepress",
+            },
+            {
+              text: "Portfolio (WordPress)",
+              link: "/projects/portfolio-wordpress",
+            },
+            {
+              text: "Figma Plugins",
+              link: "/projects/figma-plugins",
+            },
+            {
+              text: "BRÜ-ME",
+              link: "/projects/brume",
+            },
+            {
+              text: "Lumos",
+              link: "/projects/lumos",
+            },
+            {
+              text: "RoverBot",
+              link: "/projects/roverbot",
+            },
+            {
+              text: "ZOUBA",
+              link: "/projects/zouba",
+            },
+            {
+              text: "Mod-Bot",
+              link: "/projects/mod-bot",
+            },
+            {
+              text: "SALAMANDER",
+              link: "/projects/salamander",
+            },
+            {
+              text: "Velox",
+              link: "/projects/velox",
+            },
+            {
+              text: "Troll Kart",
+              link: "/projects/troll-kart",
+            },
+            {
+              text: "Quadwalker",
+              link: "/projects/quadwalker",
+            },
           ],
         },
       ],
