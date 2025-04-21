@@ -163,12 +163,12 @@ export default defineConfig({
     socialLinks: [
       { icon: "linkedin", link: "https://www.linkedin.com/in/stevanussatria" },
       { icon: "github", link: "https://github.com/stevahnes" },
-      { icon: "soundcloud", link: "https://soundcloud.com/stevanus-satria" },
       {
         icon: "researchgate",
         link: "https://www.researchgate.net/profile/Stevanus-Satria",
       },
       { icon: "strava", link: "https://www.strava.com/athletes/18347400" },
+      { icon: "soundcloud", link: "https://soundcloud.com/stevanus-satria" },
     ],
 
     footer: {
