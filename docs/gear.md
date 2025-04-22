@@ -2,7 +2,7 @@
 layout: home
 
 features:
-  - icon: { src: ./omega.webp }
+  - icon: { src: ./omega.png }
     title: Speedy
     details: Omega Speedmaster Moonwatch Professional
   - icon: { src: ./orient.png }
