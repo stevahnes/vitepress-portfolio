@@ -17,7 +17,7 @@ features:
   - icon:
       src: /wordpress.svg
     title: Portfolio (WordPress)
-    details: Long-running legacy personal website built on WordPress
+    details: Legacy personal website built on WordPress
     link: /projects/portfolio-wordpress
   - icon:
       src: /figma.webp
