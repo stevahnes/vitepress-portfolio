@@ -109,7 +109,52 @@ export default defineConfig({
         {
           text: "Milestones",
           link: "/milestones",
-          items: [],
+          items: [
+            {
+              text: "2025",
+              link: "/milestones#2025",
+            },
+            {
+              text: "2024",
+              link: "/milestones#2024",
+            },
+            {
+              text: "2022",
+              link: "/milestones#2022",
+            },
+            {
+              text: "2021",
+              link: "/milestones#2021",
+            },
+            {
+              text: "2020",
+              link: "/milestones#2020",
+            },
+            {
+              text: "2017",
+              link: "/milestones#2017",
+            },
+            {
+              text: "2016",
+              link: "/milestones#2016",
+            },
+            {
+              text: "2015",
+              link: "/milestones#2015",
+            },
+            {
+              text: "2014",
+              link: "/milestones#2014",
+            },
+            {
+              text: "2013",
+              link: "/milestones#2013",
+            },
+            {
+              text: "2008",
+              link: "/milestones#2008",
+            },
+          ],
         },
       ],
       "/recommendations": [
