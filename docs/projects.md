@@ -9,6 +9,12 @@ features:
     link: https://github.com/stevahnes/vitepress-portfolio
     target: _blank
   - icon:
+      src: /call-home.png
+    title: Call Home
+    details: Implemented call quality feedback feature and initial v2
+    link: https://github.com/bettersg/call-home
+    target: _blank
+  - icon:
       src: /wordpress.svg
     title: Portfolio (WordPress)
     details: Long-running legacy personal website built on WordPress
