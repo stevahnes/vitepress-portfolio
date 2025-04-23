@@ -1,8 +1,9 @@
 import { PipeI } from "@baseai/core";
 import advocadoMemory from "../memory/advocado-memory";
+import toolGetCurrentWeather from "../tools/get-current-weather";
 
 const pipeAdvocado = (): PipeI => ({
-  apiKey: process.env.LANGBASE_API_KEY,
+  apiKey: process.env.LANGBASE_API_KEY!,
   name: "advocado",
   description: "The only avocado advocating for Steve",
   status: "private",
@@ -33,7 +34,7 @@ const pipeAdvocado = (): PipeI => ({
   ],
   variables: [],
   memory: [advocadoMemory()],
-  tools: [],
+  tools: [toolGetCurrentWeather()],
 });
 
 export default pipeAdvocado;
