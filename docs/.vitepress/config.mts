@@ -49,6 +49,11 @@ export default defineConfig({
               target: "_blank",
             },
             {
+              text: "Call Home",
+              link: "https://github.com/bettersg/call-home",
+              target: "_blank",
+            },
+            {
               text: "Portfolio (WordPress)",
               link: "/projects/portfolio-wordpress",
             },
