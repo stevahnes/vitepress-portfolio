@@ -9,10 +9,12 @@
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:update-package": "npx vp-update",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "baseai": "baseai"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.4",
+    "baseai": "^0.9.43",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.2",
     "eslint-plugin-vue": "^10.0.0",
@@ -24,5 +26,9 @@
     "vite-plugin-image-optimizer": "^1.1.8",
     "vitepress": "^1.6.3",
     "vue": "^3.5.13"
+  },
+  "dependencies": {
+    "@baseai/core": "^0.9.43",
+    "dotenv": "^16.5.0"
   }
 }
