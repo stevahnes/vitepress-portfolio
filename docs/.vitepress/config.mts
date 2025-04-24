@@ -171,6 +171,10 @@ export default defineConfig({
               text: "Workato",
               link: "/recommendations#workato",
               items: [
+                {
+                  text: "Vishakan Subramanian",
+                  link: "/recommendations#vishakan-subramanian",
+                },
                 { text: "Chisin Ng", link: "/recommendations#chisin-ng" },
                 {
                   text: "Swathi Asokraj",

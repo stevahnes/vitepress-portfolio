@@ -1,8 +1,20 @@
 ## Workato
 
+### Vishakan Subramanian
+
+#### Software Development Engineer
+
+I have had the good fortune of working with Steve closely in the last couple of years as part of Workato's connectors engineering initiatives. In our frequent collaborative efforts, the thing that has stuck with me the most about Steve is his tenacity to ensure that problems are truly solved and his doggedness in getting things done. His mindfulness and the insightfulness he brings in from a customer-centric perspectives truly has truly helped us build quality deliverables. From personal experience, I have observed Steve to be a strong team-player, detail-oriented and very resourceful.
+
+Aside from commendable product skills, Steve is also excellent at juggling cross-team collaborations, ensuring that multiple teams are on the loop and ensure a smooth workflow. I believe that Steve's technical background is a great plus for our organization - due to his product expertise combined with a solid understanding of our platform's inner workings, he is immensely able in triaging complex customer issues with alacrity while also leading the product's development in a clear and effective direction.
+
+Steve's ability to work cross-team with engineering, customer support and leadership teams makes him a worthy product manager! Any organization out there would be blessed to have such a meticulous person as part of their team.
+
+I'm particularly grateful and happy to have the chance to work with him - I've found myself to be very inspired by his breadth and depth of domain knowledge and his growth so far!
+
 ### Chisin Ng
 
-#### Product Manager at Workato
+#### Product Manager
 
 I was very fortunate to have Steve as not just a teammate but also a mentor during my internship at Workato. Working with him was a truly fruitful experience.
 
@@ -10,7 +22,7 @@ He is knowledgeable in the SaaS product domain, which allowed me to pick up exte
 
 ### Swathi Asokraj
 
-#### Software Development Engineer at Workato
+#### Software Development Engineer
 
 It was a pleasure working alongside Stevanus Satria. He is a dedicated and insightful professional in the field. Throughout our collaboration, he consistently demonstrated exceptional intellect and clarity of thought. Always approachable and ready to assist with any doubts, he ensured that the team members felt supported and empowered. Steve has a remarkable dedication to customer satisfaction, consistently valuing feedback and going above and beyond to address their needs.
 
@@ -18,31 +30,31 @@ It was a pleasure working alongside Stevanus Satria. He is a dedicated and insig
 
 ### Siyu (Henry) Tang
 
-#### Assistant Manager, Marketplace Product at Shopee
+#### Assistant Manager, Marketplace Product
 
 I worked with Steve in Chat product in Shopee. Steve has been a great contributor and trust-worthy product manager. He has demonstrated impressive ability to learn and strong attention to details, proactively taking ownership and open to opportunities to help and improve. He was also able to consciously leveraged his technical background in forming deep understanding of product logic and contributing to the team with insights. I truly believe Steve will be a valuable asset to any organization.
 
 ### Joanne Tan
 
-#### Senior Associate, Product Management at Shopee
+#### Senior Associate, Product Management
 
 Worked with Steve together to build up the Chat product and he is such a great teammate to work with! A great contributor to ideas with his technical background that value-adds, he's also a team player who builds up the team. I really enjoyed my time collaborating with him and solving problems together, definitely a recommendation.
 
 ### Xiang Rong Ong
 
-#### Associate, Product Management at Shopee
+#### Associate, Product Management
 
 While working alongside Steve, I was thoroughly impressed by Steve’s commitment to the product he’s managing. He’s a meticulous and forward thinking product manager and also a great team player. Definitely an asset to a team!
 
 ### Laurinda Wu
 
-#### Associate, Product Management at Shopee
+#### Associate, Product Management
 
 It was fantastic to work together with Steve! He is a motivated, forward-thinking, inspiring and dedicated. He has expertise in UI design tools and technical implementation. I did learnt a lot from him when we worked together!
 
 ### Rachel Esther Chan
 
-#### Product Management Intern at Shopee
+#### Product Management Intern
 
 During my 3-month internship stint at Shopee, I had the opportunity to work with Stevanus as my mentor. This was during my early phases in the space of Product Management. Steve played a quinessential role in growing and nurturing my skillset - especially in this area. He taught me to be especially meticulous in my work and guided me in the ways of Product Management, from basics of constructing a PRD (Product Requirement Document) to communicating with cross functional stakeholders in a fast evolving company like Shopee. Even after I finished my internship, I witnessed Steve continue to lead in this space and mentoring others. I am confident that any team would benefit greatly from his addition.
 
