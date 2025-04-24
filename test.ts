@@ -1,18 +1,21 @@
 import "dotenv/config";
-import { Pipe, getRunner } from "@baseai/core";
-import pipeAdvocado from "./baseai/pipes/advocado";
+import { getRunner, Langbase } from "langbase";
 
-const pipe = new Pipe(pipeAdvocado());
+const langbase = new Langbase({
+  apiKey: process.env.LANGBASE_API_KEY!,
+});
 
 async function main() {
-  const { stream } = await pipe.run({
+  const { stream, threadId, rawResponse } = await langbase.pipes.run({
+    stream: true,
+    rawResponse: true,
+    name: "advocado",
     messages: [
       {
         role: "user",
         content: "What kind of product management role will suite Steve?",
       },
     ],
-    stream: true,
   });
 
   const runner = getRunner(stream);

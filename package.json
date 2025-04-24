@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@baseai/core": "^0.9.43",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "langbase": "^1.1.55"
   }
 }
