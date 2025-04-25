@@ -10,7 +10,7 @@ async function main() {
     name: "advocado",
     description: "The only avocado advocating for Steve",
     model: "openai:gpt-4o-mini",
-    json: true,
+    json: false,
     tools: [],
     memory: [{ name: "advocado-memory" }],
     messages: [

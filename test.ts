@@ -5,15 +5,16 @@ const langbase = new Langbase({
   apiKey: process.env.LANGBASE_API_KEY!,
 });
 
-async function main() {
+async function main(userMessage: string, thread = "") {
   const { stream, threadId, rawResponse } = await langbase.pipes.run({
     stream: true,
     rawResponse: true,
     name: "advocado",
+    threadId: thread.length > 0 ? thread : undefined,
     messages: [
       {
         role: "user",
-        content: "What kind of product management role will suite Steve?",
+        content: userMessage,
       },
     ],
   });
@@ -27,9 +28,10 @@ async function main() {
   });
   runner.on("end", () => {
     console.log("\nStream ended.");
+    console.log(`Thread ID: ${threadId}`);
   });
   runner.on("error", (error) => {
     console.error("Error:", error);
   });
 }
-main();
+main(process.argv[2], process.argv[3]);
