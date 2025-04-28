@@ -1,3 +1,5 @@
+// Move to root of the entire repository and then run npx tsx advocado.ts
+
 import "dotenv/config";
 import { Langbase } from "langbase";
 

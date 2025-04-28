@@ -115,7 +115,7 @@ const sendMessage = async () => {
 </script>
 
 <template>
-  <div class="flex h-[85vh] md:h-[40vh] w-full flex-col rounded-lg border-solid border-1 border-gray-700 p-4">
+  <div class="flex h-[80vh] md:h-[40vh] w-full flex-col rounded-lg border-solid border-1 border-gray-700 p-4">
     <div ref="chatContainerRef" class="flex-1 overflow-auto space-y-4">
       <div v-for="(msg, index) in messages" :key="index" :class="[
         'rounded-lg px-4 py-3 max-w-[80%]',

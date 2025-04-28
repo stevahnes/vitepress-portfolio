@@ -1,3 +1,5 @@
+// Move to root of the entire repository and then run npx tsx upload_advocado_memory.ts
+
 import "dotenv/config";
 import { Langbase } from "langbase";
 import fs from "fs";
