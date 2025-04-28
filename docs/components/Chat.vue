@@ -54,7 +54,7 @@ const sendMessage = async () => {
   try {
     const threadId = localStorage.getItem("threadId") ?? null;
 
-    const response = await fetch('http://advocado-agent.vercel.app/chat', {
+    const response = await fetch('https://advocado-agent.vercel.app/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
