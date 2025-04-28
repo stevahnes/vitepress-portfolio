@@ -17,6 +17,7 @@ Thumbs.db
 
 # Optional: local environment files
 .env
+.env.*
 .env.local
 .env.*.local
 
@@ -31,3 +32,7 @@ Desktop.ini
 
 # Tailwind cache (optional)
 .tailwind*
+# baseai
+**/.baseai/
+# env file
+.env

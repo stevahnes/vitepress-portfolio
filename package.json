@@ -9,7 +9,8 @@
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:update-package": "npx vp-update",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "baseai": "baseai"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.4",
@@ -24,5 +25,9 @@
     "vite-plugin-image-optimizer": "^1.1.8",
     "vitepress": "^1.6.3",
     "vue": "^3.5.13"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "langbase": "^1.1.55"
   }
 }

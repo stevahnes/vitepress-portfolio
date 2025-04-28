@@ -1,0 +1,20 @@
+{
+  "name": "advocado",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "@langbase/components": "^0.1.8",
+    "langbase": "^1.1.55",
+    "next": "15.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}
