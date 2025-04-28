@@ -8,6 +8,7 @@ const langbase = new Langbase({
 });
 
 const docNames = [
+  "about.md",
   "gear.md",
   "stack.md",
   "milestones.md",
