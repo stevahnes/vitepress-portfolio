@@ -54,7 +54,7 @@ const sendMessage = async () => {
   try {
     const threadId = localStorage.getItem("threadId") ?? null;
 
-    const response = await fetch('https://advocado-agent.vercel.app/chat', {
+    const response = await fetch('http://advocado-agent.vercel.app/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ const sendMessage = async () => {
 </script>
 
 <template>
-  <div class="flex flex-col h-full max-w-2xl mx-auto p-4">
+  <div class="flex h-[85vh] md:h-[40vh] w-full flex-col rounded-lg border-solid border-1 border-gray-700 p-4">
     <div ref="chatContainerRef" class="flex-1 overflow-auto space-y-4">
       <div v-for="(msg, index) in messages" :key="index" :class="[
         'rounded-lg px-4 py-3 max-w-[80%]',
@@ -128,20 +128,19 @@ const sendMessage = async () => {
     </div>
 
     <form @submit.prevent="sendMessage" class="mt-4 flex">
-      <input ref="inputRef" v-model="userInput" type="text" placeholder="Type your message..."
+      <input ref="inputRef" v-model="userInput" type="text" placeholder="Type your question here ..."
         class="flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 p-2 dark:bg-gray-800 dark:text-gray-100"
         :disabled="loading" />
       <button type="submit"
         class="bg-blue-500 hover:bg-blue-600 text-white dark:bg-blue-400 dark:hover:bg-blue-500 dark:text-gray-900 rounded-r-md px-4"
         :disabled="loading">
-        {{ loading ? '...' : 'Send' }}
+        {{ loading ? '⏳' : 'Send' }}
       </button>
     </form>
   </div>
 </template>
 
 <style scoped>
-/* Scrollbar styling (optional) */
 ::-webkit-scrollbar {
   width: 6px;
 }

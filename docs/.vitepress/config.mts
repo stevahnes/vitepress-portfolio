@@ -30,6 +30,7 @@ export default defineConfig({
     logo: "/small-logo-no-bg.png",
     nav: [
       { text: "Home", link: "/" },
+      { text: "About", link: "/about" },
       { text: "Projects", link: "/projects" },
       { text: "Milestones", link: "/milestones" },
       { text: "Recommendations", link: "/recommendations" },
