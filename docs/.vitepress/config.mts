@@ -45,6 +45,11 @@ export default defineConfig({
           link: "/projects",
           items: [
             {
+              text: "Advocado",
+              link: "https://github.com/stevahnes/vitepress-portfolio/tree/main/langbase",
+              target: "_blank",
+            },
+            {
               text: "Portfolio (VitePress)",
               link: "https://github.com/stevahnes/vitepress-portfolio",
               target: "_blank",

@@ -3,6 +3,12 @@ layout: home
 
 features:
   - icon:
+      src: /advocado.webp
+    title: Advocado
+    details: My biggest advocate, made possible by Langbase and Vercel
+    link: https://github.com/stevahnes/vitepress-portfolio/tree/main/langbase
+    target: _blank
+  - icon:
       src: /vitepress.webp
     title: Portfolio (VitePress)
     details: Revamped personal website built using VitePress
