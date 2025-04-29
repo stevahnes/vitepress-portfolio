@@ -98,15 +98,14 @@ const sendMessage = async () => {
         const delta = parsed.choices[0]?.delta
         if (delta?.content) {
           assistantMessage.content += delta.content
-          scrollToBottom()
         }
       }
     }
   } catch (error) {
     console.error('Error during streaming:', error)
     assistantMessage.content += '\n[Error receiving response]'
-    scrollToBottom()
   } finally {
+    scrollToBottom()
     loading.value = false
     userInput.value = ''
     inputRef.value?.focus()
