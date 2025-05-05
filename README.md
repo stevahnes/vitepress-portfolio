@@ -11,6 +11,8 @@ Deployed on [Vercel](https://vercel.com/) with [Cloudflare](https://www.cloudfla
 - 🎨 **Tailwind CSS v4**: Utility-first CSS framework for rapid UI development.
 - 🌙 **Dark Mode**: Seamless light/dark theme toggle.
 - 📱 **Responsive Design**: Mobile-first and fully responsive layout.
+- 🧠 **Advocado**: The AMA agent welcoming you to the site, hosted on Langbase.
+- 🛠 **Dedicated Backend**: Proxies requests to Langbase without exposing secret tokens.
 - 📦 **GitHub-Vercel Integration**: Dynamically fetches and displays public repositories to Vercel.
 
 ## 🚀 Getting Started
@@ -27,13 +29,20 @@ Deployed on [Vercel](https://vercel.com/) with [Cloudflare](https://www.cloudfla
 git clone https://github.com/stevahnes/vitepress-portfolio.git
 cd vitepress-portfolio
 
-# Install dependencies
+# Install dependencies for frontend
 npm install
 # or
 pnpm install
+
+# Install dependencies for backend
+cd api & npm install
+# or
+cd api & pnpm install
 ```
 
 ### 🏃 Start the development server
+
+#### Frontend
 
 ```bash
 npm run docs:dev
@@ -41,7 +50,17 @@ npm run docs:dev
 pnpm docs:dev
 ```
 
+#### Backend
+
+```bash
+cd api & npm run dev
+# or
+cd api & pnpm run dev
+```
+
 ### 🏗️ Generate static files
+
+#### Frontend
 
 ```bash
 npm run docs:build

@@ -9,8 +9,7 @@
     "docs:build": "vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:update-package": "npx vp-update",
-    "docs:preview": "vitepress preview docs",
-    "baseai": "baseai"
+    "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.4",
