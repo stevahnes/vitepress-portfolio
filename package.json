@@ -24,9 +24,5 @@
     "vite-plugin-image-optimizer": "^1.1.8",
     "vitepress": "^1.6.3",
     "vue": "^3.5.13"
-  },
-  "dependencies": {
-    "dotenv": "^16.5.0",
-    "langbase": "^1.1.55"
   }
 }
