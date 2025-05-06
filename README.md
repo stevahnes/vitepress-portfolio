@@ -30,14 +30,19 @@ git clone https://github.com/stevahnes/vitepress-portfolio.git
 cd vitepress-portfolio
 
 # Install dependencies for frontend
-npm install
+cd frontend & npm install
 # or
-pnpm install
+cd frontend & pnpm install
 
 # Install dependencies for backend
 cd api & npm install
 # or
 cd api & pnpm install
+
+# Install dependencies for langbase
+cd langbase & npm install
+# or
+cd langbase & pnpm install
 ```
 
 ### 🏃 Start the development server

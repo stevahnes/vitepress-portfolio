@@ -1,0 +1,28 @@
+{
+  "name": "stevanus-satria",
+  "description": "Stevanus Satria's Personal Website",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint --fix",
+    "format": "prettier .  --write",
+    "docs:build": "vitepress build docs",
+    "docs:dev": "vitepress dev docs",
+    "docs:update-package": "npx vp-update",
+    "docs:preview": "vitepress preview docs"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.4",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-vue": "^10.0.0",
+    "prettier": "3.5.3",
+    "sharp": "^0.34.1",
+    "svgo": "^3.3.2",
+    "tailwindcss": "^4.1.4",
+    "typescript": "^5.8.3",
+    "vite-plugin-image-optimizer": "^1.1.8",
+    "vitepress": "^1.6.3",
+    "vue": "^3.5.13"
+  }
+}
