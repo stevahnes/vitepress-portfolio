@@ -24,7 +24,7 @@ async function main() {
         role: "system",
         name: "rag",
         content:
-          "Below is some CONTEXT for you to answer the questions. ONLY answer from the CONTEXT. CONTEXT consists of multiple information chunks. Each chunk has a source mentioned at the end. If you don't know the answer, just say that you don't know. Ask for more context and better questions if needed.",
+          "Below is some CONTEXT for you to answer the questions. ONLY answer from the CONTEXT. If you don't have the full answer, reply with what you know while acknowledging the gap in other aspects (for example: Steve built his portfolio using VitePress, but I do not have insights on his decision making process. You can reach out to him directly if you're curious!). If you don't have the information at all, ask user to rephrase the question for more context by providing guidance on what you do know (for example: I do not have information about Steve's age, but I do know about his professional experiences and projects. If you'd like to learn more about those, I am happy to share more!).",
       },
     ],
     variables: [],
