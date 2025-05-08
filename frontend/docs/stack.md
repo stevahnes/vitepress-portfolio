@@ -28,6 +28,8 @@ features:
     title: Vercel
   - icon: { src: ./vitepress.webp }
     title: VitePress
+  - icon: { src: ./langbase.png }
+    title: Langbase
   - icon: { src: ./wordpress.svg }
     title: WordPress
   - icon: { dark: "./github-dark.png", light: "./github-light.png" }
@@ -44,4 +46,8 @@ features:
     title: Figma
   - icon: { src: ./miro.png }
     title: Miro
+  - icon: { src: ./chatgpt.png }
+    title: ChatGPT
+  - icon: { src: ./cove-ai.png }
+    title: Cove AI
 ---
