@@ -49,26 +49,45 @@ const scrollToBottom = async () => {
   }
 };
 
-// Resize functionality
+// Resize functionality - now supporting both mouse and touch events
 const startResize = (e) => {
   e.preventDefault();
   isDragging.value = true;
-  startY.value = e.clientY;
+
+  // Handle both mouse and touch events
+  const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+  startY.value = clientY;
   startHeight.value = chatHeight.value;
-  document.addEventListener('mousemove', handleResize);
-  document.addEventListener('mouseup', stopResize);
+
+  // Add appropriate event listeners based on event type
+  if (e.type.includes('touch')) {
+    document.addEventListener('touchmove', handleTouchResize, { passive: false });
+    document.addEventListener('touchend', stopResize);
+  } else {
+    document.addEventListener('mousemove', handleMouseResize);
+    document.addEventListener('mouseup', stopResize);
+  }
 };
 
-const handleResize = (e) => {
+const handleMouseResize = (e) => {
   if (!isDragging.value) return;
   const deltaY = e.clientY - startY.value;
   chatHeight.value = Math.max(200, startHeight.value + deltaY);
 };
 
+const handleTouchResize = (e) => {
+  if (!isDragging.value) return;
+  e.preventDefault(); // Prevent scrolling while resizing
+  const deltaY = e.touches[0].clientY - startY.value;
+  chatHeight.value = Math.max(200, startHeight.value + deltaY);
+};
+
 const stopResize = () => {
   isDragging.value = false;
-  document.removeEventListener('mousemove', handleResize);
+  document.removeEventListener('mousemove', handleMouseResize);
   document.removeEventListener('mouseup', stopResize);
+  document.removeEventListener('touchmove', handleTouchResize);
+  document.removeEventListener('touchend', stopResize);
 
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('chatHeight', chatHeight.value.toString());
@@ -254,10 +273,10 @@ watch(isDark, () => { }, { immediate: true });
       </div>
     </div>
 
-    <!-- Resize handle -->
+    <!-- Resize handle with both mouse and touch event listeners -->
     <div
       class="!h-2 !w-full !cursor-ns-resize !flex !justify-center !items-center hover:!bg-gray-300 dark:hover:!bg-gray-700 !transition-colors !rounded-b-lg"
-      @mousedown="startResize">
+      @mousedown="startResize" @touchstart="startResize">
       <div :class="['!w-12 !h-1 !rounded-full', clientSideTheme && isDark ? '!bg-gray-600' : '!bg-gray-300']"></div>
     </div>
 
