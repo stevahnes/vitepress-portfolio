@@ -38,6 +38,7 @@ const isDragging = ref<boolean>(false);
 const startY = ref<number>(0);
 const startHeight = ref<number>(0);
 const chatHeight = ref<number>(400); // Default height in pixels
+const clientSideTheme = ref<boolean>(false); // Track if we're rendered on client
 
 const inputRef = ref<HTMLInputElement | null>(null);
 const chatContainerRef = ref<HTMLDivElement | null>(null);
@@ -49,12 +50,12 @@ const { isDark } = useData();
 // CSS variables for theme-dependent styling
 const cssVars = computed(() => {
   return {
-    '--scrollbar-thumb': isDark.value ? '#4a5568' : '#cbd5e0',
-    '--scrollbar-thumb-hover': isDark.value ? '#2d3748' : '#a0aec0',
-    '--scrollbar-track': isDark.value ? '#1a202c' : '#edf2f7',
-    '--code-bg-color': isDark.value ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.05)',
-    '--link-color': isDark.value ? '#90cdf4' : '#3182ce',
-    '--blockquote-border-color': isDark.value ? '#4a5568' : '#cbd5e0',
+    '--scrollbar-thumb': (clientSideTheme.value && isDark.value) ? '#4a5568' : '#cbd5e0',
+    '--scrollbar-thumb-hover': (clientSideTheme.value && isDark.value) ? '#2d3748' : '#a0aec0',
+    '--scrollbar-track': (clientSideTheme.value && isDark.value) ? '#1a202c' : '#edf2f7',
+    '--code-bg-color': (clientSideTheme.value && isDark.value) ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.05)',
+    '--link-color': (clientSideTheme.value && isDark.value) ? '#90cdf4' : '#3182ce',
+    '--blockquote-border-color': (clientSideTheme.value && isDark.value) ? '#4a5568' : '#cbd5e0',
   };
 });
 
@@ -104,7 +105,9 @@ const stopResize = () => {
   document.removeEventListener('mouseup', stopResize);
 
   // Save the chat height to localStorage for persistence
-  localStorage.setItem('chatHeight', chatHeight.value.toString());
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('chatHeight', chatHeight.value.toString());
+  }
 };
 
 const sendMessage = async () => {
@@ -124,7 +127,7 @@ const sendMessage = async () => {
   setLoading(true);
 
   try {
-    const threadId = localStorage.getItem('threadId') ?? null;
+    const threadId = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
 
     const response = await fetch('https://advocado-agent.vercel.app/chat', {
       method: 'POST',
@@ -146,7 +149,7 @@ const sendMessage = async () => {
 
     if (!response.body) throw new Error('No response body');
 
-    if (response.headers.get('lb-thread-id')) {
+    if (response.headers.get('lb-thread-id') && typeof localStorage !== 'undefined') {
       localStorage.setItem('threadId', response.headers.get('lb-thread-id') as string);
     }
 
@@ -217,8 +220,11 @@ const sendMessage = async () => {
 };
 
 onMounted(() => {
+  // Mark that we're now client-side
+  clientSideTheme.value = true;
+
   // Set initial height based on default or previously stored value
-  if (chatWindowRef.value) {
+  if (chatWindowRef.value && typeof localStorage !== 'undefined') {
     chatHeight.value = localStorage.getItem('chatHeight')
       ? parseInt(localStorage.getItem('chatHeight') || '400')
       : 400;
@@ -235,24 +241,30 @@ watch(
   () => {
     scrollToBottom();
   },
-  { deep: true } // Fix 5: Add deep watching to detect content changes
+  { deep: true } // Add deep watching to detect content changes
 );
+
+// Watch for theme changes
+watch(isDark, () => {
+  // No need to do anything here - computed vars will update automatically
+}, { immediate: true });
 </script>
 
 <template>
   <div ref="chatWindowRef" :style="{ height: `${chatHeight}px`, ...cssVars }" :class="[
     'flex w-full flex-col rounded-lg !p-4 !shadow-lg relative',
-    isDark
+    clientSideTheme && isDark
       ? '!border !border-gray-700 !bg-gray-900'
       : '!border !border-gray-200 !bg-gray-50'
   ]">
     <!-- Header with title -->
     <div :class="[
       '!mb-4 !pb-3 flex items-center',
-      isDark ? '!border-b !border-gray-700' : '!border-b !border-gray-200'
+      clientSideTheme && isDark ? '!border-b !border-gray-700' : '!border-b !border-gray-200'
     ]">
       <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
-      <h3 :class="isDark ? '!text-gray-100 !font-medium' : '!text-gray-800 !font-medium'">Chat with Advocado 🥑</h3>
+      <h3 :class="clientSideTheme && isDark ? '!text-gray-100 !font-medium' : '!text-gray-800 !font-medium'">Chat with
+        Advocado 🥑</h3>
     </div>
 
     <div ref="chatContainerRef" class="flex-1 !overflow-auto !space-y-4 flex flex-col !px-1">
@@ -265,7 +277,7 @@ watch(
           '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
           msg.role === 'user'
             ? '!bg-indigo-600 !text-white'
-            : isDark
+            : clientSideTheme && isDark
               ? '!bg-gray-800 !text-gray-100 !border !border-gray-700'
               : '!bg-white !text-gray-800 !border !border-gray-200',
         ]">
@@ -274,13 +286,13 @@ watch(
               '!text-xs',
               msg.role === 'user'
                 ? '!text-gray-200'
-                : isDark ? '!text-gray-400' : '!text-gray-500'
+                : clientSideTheme && isDark ? '!text-gray-400' : '!text-gray-500'
             ]">{{ msg.role === 'user' ? 'You' : 'Advocado' }}</span>
             <span v-if="msg.timestamp" :class="[
               '!text-xs !ml-4',
               msg.role === 'user'
                 ? '!text-gray-200'
-                : isDark ? '!text-gray-400' : '!text-gray-500'
+                : clientSideTheme && isDark ? '!text-gray-400' : '!text-gray-500'
             ]">{{ formatTime(msg.timestamp) }}</span>
           </div>
           <!-- Use v-html with markdown parsing for rendering formatted text -->
@@ -292,27 +304,29 @@ watch(
       <div v-if="loading" class="flex !justify-start !w-full">
         <div :class="[
           '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
-          isDark
+          clientSideTheme && isDark
             ? '!bg-gray-800 !text-gray-300 !border !border-gray-700'
             : '!bg-white !text-gray-600 !border !border-gray-200'
         ]">
           <div class="!flex !justify-between !items-center !mb-1">
-            <span :class="isDark ? '!text-xs !text-gray-400' : '!text-xs !text-gray-500'">Advocado</span>
-            <span :class="isDark ? '!text-xs !text-gray-400 !ml-4' : '!text-xs !text-gray-500 !ml-4'">{{
-              formatTime(Date.now()) }}</span>
+            <span
+              :class="clientSideTheme && isDark ? '!text-xs !text-gray-400' : '!text-xs !text-gray-500'">Advocado</span>
+            <span
+              :class="clientSideTheme && isDark ? '!text-xs !text-gray-400 !ml-4' : '!text-xs !text-gray-500 !ml-4'">{{
+                formatTime(Date.now()) }}</span>
           </div>
           <div class="!flex !items-center">
             <span :class="[
               '!inline-block !h-2 !w-2 !rounded-full !mr-1 !animate-pulse',
-              isDark ? '!bg-gray-400' : '!bg-gray-300'
+              clientSideTheme && isDark ? '!bg-gray-400' : '!bg-gray-300'
             ]"></span>
             <span :class="[
               '!inline-block !h-2 !w-2 !rounded-full !mx-1 !animate-pulse',
-              isDark ? '!bg-gray-400' : '!bg-gray-300'
+              clientSideTheme && isDark ? '!bg-gray-400' : '!bg-gray-300'
             ]" style="animation-delay: 0.2s"></span>
             <span :class="[
               '!inline-block !h-2 !w-2 !rounded-full !ml-1 !animate-pulse',
-              isDark ? '!bg-gray-400' : '!bg-gray-300'
+              clientSideTheme && isDark ? '!bg-gray-400' : '!bg-gray-300'
             ]" style="animation-delay: 0.4s"></span>
           </div>
         </div>
@@ -323,18 +337,18 @@ watch(
     <div
       class="!h-2 !w-full !cursor-ns-resize !flex !justify-center !items-center hover:!bg-gray-300 dark:hover:!bg-gray-700 !transition-colors !rounded-b-lg"
       @mousedown="startResize">
-      <div :class="['!w-12 !h-1 !rounded-full', isDark ? '!bg-gray-600' : '!bg-gray-300']"></div>
+      <div :class="['!w-12 !h-1 !rounded-full', clientSideTheme && isDark ? '!bg-gray-600' : '!bg-gray-300']"></div>
     </div>
 
     <form @submit.prevent="sendMessage" :class="[
       '!mt-4 flex !rounded-lg !overflow-hidden !shadow-md',
-      isDark
+      clientSideTheme && isDark
         ? '!bg-gray-800 !border !border-gray-700'
         : '!bg-gray-100 !border !border-gray-200'
     ]">
       <input ref="inputRef" v-model="userInput" type="text" placeholder="Ask something about Steve..." :class="[
         'flex-1 !border-0 !p-3 !outline-none !focus:ring-0 !focus:ring-offset-0',
-        isDark
+        clientSideTheme && isDark
           ? '!bg-gray-800 !text-gray-100 !placeholder-gray-500'
           : '!bg-gray-100 !text-gray-800 !placeholder-gray-400'
       ]" :disabled="loading" />
