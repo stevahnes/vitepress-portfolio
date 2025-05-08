@@ -20,7 +20,7 @@ const docNames = [
 ];
 
 async function main(docName: string) {
-  const src = path.join(process.cwd(), "docs", docName);
+  const src = path.join(process.cwd(), "../frontend/docs", docName);
 
   const response = await langbase.memories.documents.upload({
     document: fs.readFileSync(src),
