@@ -27,7 +27,7 @@ interface ChatChunk {
 }
 
 const userInput = ref<string>('')
-const messages = ref<Message[]>([])
+const messages = ref<Message[]>([{ role: 'assistant', content: 'Hi! What would you learn about Steve today?' }])
 const loading = ref<boolean>(false)
 
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -127,7 +127,7 @@ const sendMessage = async () => {
     </div>
 
     <form @submit.prevent="sendMessage" class="mt-4 flex">
-      <input ref="inputRef" v-model="userInput" type="text" placeholder="Type your question here ..."
+      <input ref="inputRef" v-model="userInput" type="text" placeholder="What would you like to ask about Steve?"
         class="flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 p-2 dark:bg-gray-800 dark:text-gray-100"
         :disabled="loading" />
       <button type="submit"

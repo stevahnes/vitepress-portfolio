@@ -5,8 +5,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # Build output
-docs/.vitepress/dist/
-docs/.vitepress/cache/
+**/docs/.vitepress/dist/
+**/docs/.vitepress/cache/
 
 # System files
 .DS_Store
@@ -32,7 +32,3 @@ Desktop.ini
 
 # Tailwind cache (optional)
 .tailwind*
-# baseai
-**/.baseai/
-# env file
-.env
