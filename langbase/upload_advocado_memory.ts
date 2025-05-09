@@ -17,6 +17,7 @@ const docNames = [
   "projects.md",
   "recommendations.md",
   "index.md",
+  "resume.md",
 ];
 
 async function main(docName: string) {
