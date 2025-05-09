@@ -36,6 +36,7 @@ export default defineConfig({
       { text: "Recommendations", link: "/recommendations" },
       { text: "Stack", link: "/stack" },
       { text: "Gear", link: "/gear" },
+      { text: "Resume", link: "/resume" },
     ],
 
     sidebar: {

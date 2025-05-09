@@ -22,7 +22,6 @@ export function generateOnePageStandardPDF(
   jsPDFInstance: jsPDF,
   cursor: Cursor,
 ): void {
-  console.log(resume);
   /** Add fonts */
   jsPDFInstance.addFileToVFS("Calibri-normal.ttf", calibriNormal);
   jsPDFInstance.addFont("Calibri-normal.ttf", "Calibri", "normal");

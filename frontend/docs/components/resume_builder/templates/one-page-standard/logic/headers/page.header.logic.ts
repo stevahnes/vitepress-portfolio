@@ -37,22 +37,23 @@ export function constructHeader(
   );
 
   /** Construct Subtitle */
-  updateFontAndSize(
-    jsPDFInstance,
-    standard.FONT_NAME,
-    FontStyle.REGULAR,
-    cursor.getSize(),
-  );
-  writeCenter(jsPDFInstance, header.subtitle, cursor);
-  enterAndCheckMargin(
-    jsPDFInstance,
-    cursor,
-    standard,
-    pageParameters,
-    DEFAULT_LINE_HEIGHT,
-    1,
-  );
-
+  if (header.subtitle.length > 0) {
+    updateFontAndSize(
+      jsPDFInstance,
+      standard.FONT_NAME,
+      FontStyle.REGULAR,
+      cursor.getSize(),
+    );
+    writeCenter(jsPDFInstance, header.subtitle, cursor);
+    enterAndCheckMargin(
+      jsPDFInstance,
+      cursor,
+      standard,
+      pageParameters,
+      DEFAULT_LINE_HEIGHT,
+      1,
+    );
+  }
   /** Construct Additional Details */
   cursor.setSize(standard.TEXT_FONT_SIZE);
   updateFontAndSize(

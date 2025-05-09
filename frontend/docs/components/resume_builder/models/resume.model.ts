@@ -40,7 +40,7 @@ export interface OldEducation {
 
 export interface Education {
   institution: string;
-  qualification: string[];
+  qualification: string;
   start: string;
   end: string;
   honorsAndGrade?: string;

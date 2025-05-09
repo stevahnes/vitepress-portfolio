@@ -14,10 +14,9 @@ import {
  */
 export function parseResumeMarkdown(markdown: string): Resume {
   const sections = splitIntoSections(markdown);
-
   return {
     header: parseHeader(sections.header),
-    profile: sections.profile,
+    profile: sections.profile.trim(),
     competencies: parseCompetencies(sections.competencies),
     work: parseWork(sections.work),
     education: parseEducation(sections.education),
@@ -46,19 +45,19 @@ function splitIntoSections(markdown: string) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    if (line.startsWith("## PERSONAL PROFILE")) {
+    if (line.startsWith("## Personal Profile")) {
       currentSection = "profile";
       continue;
-    } else if (line.startsWith("## CORE COMPETENCIES")) {
+    } else if (line.startsWith("## Core Competencies")) {
       currentSection = "competencies";
       continue;
-    } else if (line.startsWith("## WORK EXPERIENCE")) {
+    } else if (line.startsWith("## Work Experience")) {
       currentSection = "work";
       continue;
-    } else if (line.startsWith("## EDUCATION")) {
+    } else if (line.startsWith("## Education")) {
       currentSection = "education";
       continue;
-    } else if (line.startsWith("## AWARDS AND CERTIFICATIONS")) {
+    } else if (line.startsWith("## Awards and Certifications")) {
       currentSection = "awardsAndCertifications";
       continue;
     }
@@ -70,39 +69,67 @@ function splitIntoSections(markdown: string) {
 }
 
 /**
+ * Extract content from markdown link
+ * @param text Text containing markdown links
+ * @param preferLabel Whether to prefer the label over the URL
+ * @returns Cleaned text with links processed
+ */
+function processMarkdownLinks(
+  text: string,
+  preferLabel: boolean = true,
+): string {
+  // Handle empty links [](link) - remove them entirely
+  text = text.replace(/\[\]\(([^)]+)\)/g, "");
+
+  // Handle regular links [label](link)
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, label, url) => {
+    return preferLabel ? label : url;
+  });
+
+  return text.trim();
+}
+
+/**
  * Parse the header section
  */
 function parseHeader(headerSection: string): Header {
   const lines = headerSection.trim().split("\n");
-  const name = lines[0].replace("# ", "").trim();
+  const name = processMarkdownLinks(lines[0].replace("# ", "").trim(), true);
 
   // Extract contact information from second line
-  const contactLine = lines[2];
-  const contactItems = contactLine.match(/\[.*?\]|\(.*?\)|[^|]+/g) || [];
+  const contactLine = lines[2] || "";
+  const contactItems = contactLine
+    .split("|")
+    .map((item) => item.trim())
+    .filter(Boolean);
 
-  // Clean up contact items
-  const cleanedItems = contactItems.map((item) => item.trim());
-
-  // Find email and phone
   let email = "";
   let phone = "";
   let leftDetail = "";
   let rightDetail = "";
 
-  cleanedItems.forEach((item) => {
+  contactItems.forEach((item) => {
+    item;
+    // Process email
     if (item.includes("@")) {
-      // Extract email from markdown link format [email](mailto:email)
-      const emailMatch =
-        item.match(/\[(.*?@.*?)\]/) || item.match(/(.*?@.*?)/) || [];
-      email = emailMatch[1] || item;
-    } else if (item.match(/\(\d+\)/) || item.includes("8366 8579")) {
-      phone = item;
-    } else if (item.includes("LinkedIn")) {
-      leftDetail = "LinkedIn";
-    } else if (item.includes("www.")) {
-      // Extract website from markdown link format [website](https://website)
-      const websiteMatch = item.match(/\[(www\..*?)\]/) || [];
-      rightDetail = websiteMatch[1] || item;
+      email = item.trim();
+      // Make sure to preserve the domain in email addresses
+      email = processMarkdownLinks(email, true);
+    }
+    // Process phone
+    else if (
+      item.match(/\(\d+\)/) ||
+      item.match(/\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/)
+    ) {
+      phone = processMarkdownLinks(item, true);
+    }
+    // Process LinkedIn or left detail
+    else if (item.toLowerCase().includes("linkedin")) {
+      leftDetail = processMarkdownLinks(item, false);
+    }
+    // Process website or right detail
+    else if (item.includes("www.") || item.includes("http")) {
+      rightDetail = processMarkdownLinks(item, true);
     }
   });
 
@@ -126,7 +153,7 @@ function parseCompetencies(competenciesSection: string): string[] {
   const competenciesText = competenciesSection.trim();
   return competenciesText
     .split("•")
-    .map((item) => item.trim())
+    .map((item) => processMarkdownLinks(item.trim(), true))
     .filter((item) => item !== "");
 }
 
@@ -144,60 +171,82 @@ function parseWork(workSection: string): Work[] {
   companyBlocks.forEach((block) => {
     const lines = block.trim().split("\n");
     const companyLine = lines[0].replace("### ", "").trim();
+    const company = processMarkdownLinks(companyLine, true);
 
-    // Assume second line contains title, location, and period
-    const detailsLine = lines[2];
-    const [titlePart, locationPart, periodPart] = detailsLine
-      .split("|")
-      .map((part) => part.trim());
+    // Find detail lines (which contain title, location, and period)
+    const detailLines: string[] = [];
+    let currentLineIndex = 1;
 
-    const company = companyLine;
-    const location = locationPart;
+    // Skip any empty lines after company name
+    while (
+      currentLineIndex < lines.length &&
+      lines[currentLineIndex].trim() === ""
+    ) {
+      currentLineIndex++;
+    }
 
-    // Extract designations
-    const designations: Designation[] = [];
-    const titleParts = titlePart.split(",").map((t) => t.trim());
-    const currentTitle = titleParts[0]
-      .replace("**", "")
-      .replace("**", "")
-      .trim();
+    // Collect all detail lines (they contain '|' character and come before bullet points)
+    while (
+      currentLineIndex < lines.length &&
+      lines[currentLineIndex].includes("|") &&
+      !lines[currentLineIndex].trim().startsWith("-")
+    ) {
+      detailLines.push(lines[currentLineIndex].trim());
+      currentLineIndex++;
+    }
 
-    // Parse period for the designation
-    const periodMatch = periodPart.match(/(\w+ \d{4}).*?(\w+ \d{4}|Present)/);
-    console.log(periodMatch);
-    const start = periodMatch ? periodMatch[1] : "";
-    const end = periodMatch ? periodMatch[2] : "";
+    // Skip any empty lines after detail lines
+    while (
+      currentLineIndex < lines.length &&
+      lines[currentLineIndex].trim() === ""
+    ) {
+      currentLineIndex++;
+    }
 
     // Extract descriptions (bullet points)
     const descriptions: string[] = [];
-    let startIdx = 2; // Skip company and details lines
-
-    while (startIdx < lines.length && lines[startIdx].trim() === "") {
-      startIdx++;
-    }
-
-    for (let i = startIdx; i < lines.length; i++) {
+    for (let i = currentLineIndex; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line.startsWith("-")) {
-        descriptions.push(line.substring(1).trim());
+        descriptions.push(processMarkdownLinks(line.substring(1).trim(), true));
       }
     }
 
-    // Create designation
-    const designation: Designation = {
-      title: currentTitle,
-      start,
-      end,
-      descriptions: [],
-    };
+    // Parse detail lines into designations
+    const designations: Designation[] = [];
+    detailLines.forEach((detailLine) => {
+      const detailsParts = detailLine.split("|").map((part) => part.trim());
 
-    designations.push(designation);
+      const titlePart = detailsParts[0] || "";
+      const locationPart = detailsParts[1] || "";
+      const periodPart = detailsParts[2] || "";
+
+      const title = processMarkdownLinks(
+        titlePart.replace(/\*\*/g, "").trim(),
+        true,
+      );
+
+      // Parse period for the designation
+      const periodMatch = periodPart.match(/(\w+ \d{4}).*?(\w+ \d{4}|Present)/);
+      const start = periodMatch ? periodMatch[1] : "";
+      const end = periodMatch ? periodMatch[2] : "";
+
+      designations.push({
+        title,
+        start,
+        end,
+        descriptions: [], // Individual designations don't have descriptions in this format
+      });
+    });
 
     workEntries.push({
       company,
-      location,
+      location: processMarkdownLinks(
+        detailLines[0].split("|").map((part) => part.trim())[1],
+        true,
+      ),
       designations,
-      descriptions,
+      descriptions, // All descriptions belong to the company as a whole
     });
   });
 
@@ -217,31 +266,34 @@ function parseEducation(educationSection: string): Education[] {
 
   institutionBlocks.forEach((block) => {
     const lines = block.trim().split("\n");
-    const institution = lines[0].replace("### ", "").trim();
+    const institutionLine = lines[0].replace("### ", "").trim();
+    const institution = processMarkdownLinks(institutionLine, true);
 
     // Qualification on second line
-    const qualificationLine = lines[2];
-    console.log(lines);
-
-    const [qualification, periodPart] = qualificationLine
+    const qualificationLine = lines[2] || "";
+    const qualificationParts = qualificationLine
       .split("|")
-      .map((part) => part.trim());
+      .map((part) => part.replace("**", "").replace("**", "").trim());
+
+    const qualificationPart = qualificationParts[0] || "";
+    const periodPart = qualificationParts[1] || "";
+
+    const qualification = processMarkdownLinks(qualificationPart, true);
 
     // Period on the same line as qualification or next line
     const periodMatch = periodPart.match(/(\w+ \d{4}).*?(\w+ \d{4}|Present)/);
-    console.log(periodMatch);
     const start = periodMatch ? periodMatch[1] : "";
     const end = periodMatch ? periodMatch[2] : "";
-    let honorsAndGrade: string | undefined;
 
+    let honorsAndGrade: string | undefined;
     // Check if there's an honors line
     if (lines.length > 3) {
-      const potentialHonorsLine = lines[3].trim();
+      const potentialHonorsLine = lines[4]?.trim() || "";
       if (
         !potentialHonorsLine.startsWith("###") &&
         potentialHonorsLine !== ""
       ) {
-        honorsAndGrade = potentialHonorsLine;
+        honorsAndGrade = processMarkdownLinks(potentialHonorsLine, true);
       }
     }
 
@@ -270,7 +322,11 @@ function parseAwardsAndCertifications(
 
   lines.forEach((line) => {
     if (line.startsWith("-")) {
-      const awardText = line.substring(1).trim();
+      let awardText = line.substring(1).trim();
+
+      // Process any markdown links in the award text
+      awardText = processMarkdownLinks(awardText, true);
+
       const dateMatch = awardText.match(/\| (\w+ \d{4})$/);
 
       if (dateMatch) {
@@ -294,7 +350,3 @@ function parseAwardsAndCertifications(
 
   return awards;
 }
-
-// Example usage:
-// const resumeMarkdown = `# Your markdown content here...`;
-// const resume = parseResumeMarkdown(resumeMarkdown);

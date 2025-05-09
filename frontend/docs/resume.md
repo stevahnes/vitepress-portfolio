@@ -10,20 +10,21 @@ import DownloadResumeButton from './components/DownloadResume.vue'
 
 [LinkedIn](https://www.linkedin.com/in/stevanussatria) | [stevanus.satria@gmail.com](mailto:stevanus.satria@gmail.com) | (65) 8366 8579 | [www.stevanussatria.com](https://www.stevanussatria.com)
 
-## PERSONAL PROFILE
+## Personal Profile
 
 Seasoned product manager with 7+ years of experience in requirements gathering, data analysis, vision, and strategy of B2B SaaS and B2C software products. Successfully launched key functionalities, delivered performance and security enhancements, resolved production issues, and managed global customer relationships. Certified Scrum Product Owner, Certified ScrumMaster, and Usability Analyst who is also proficient in modern software development stack, API standards, issue tracking tools, and leading UI design applications. Fluent in English, Indonesian, Malay, and basic conversational Chinese.
 
-## CORE COMPETENCIES
+## Core Competencies
 
 SQL • Python • AngularJS • JavaScript • Typescript • Java • HTML • CSS • Git • JIRA • Confluence • ScriptRunner • Figma
 API • Postman • Agile • Scrum • Product specification • Design thinking • Project management • Process automation
 
-## WORK EXPERIENCE
+## Work Experience
 
-### WORKATO
+### Workato
 
-**Product Manager** | Singapore | June 2022 – Present
+**Senior Product Manager** | Singapore | March 2025 – Present  
+**Product Manager** | Singapore | June 2022 – March 2025
 
 - Stabilized legacy database by reducing maximum query execution time by 96% and freeing up 277GB of storage space.
 - Spearheaded migration of 90% of customers using code connectors to sandboxed execution.
@@ -31,7 +32,7 @@ API • Postman • Agile • Scrum • Product specification • Design thinkin
 - Aligned Workday connector with OWASP Zero Trust API Access and reduced its deployment size by 480MB.
 - Led verification effort of Workato solutions for SuccessFactors and Google Cloud integrations with SAP and Google.
 
-### SHOPEE
+### Shopee
 
 **Senior Associate, Product Management** | Singapore | March 2021 – June 2022
 
@@ -40,7 +41,7 @@ API • Postman • Agile • Scrum • Product specification • Design thinkin
 - Launched an internal quality control portal for internal audit of messages sent within Shopee Chat.
 - Reduced page load time of Shopee's App Chat by 50% and removed loading state while scrolling across all platforms.
 
-### AMADEUS IT GROUP
+### Amadeus IT Group
 
 **System Analyst (Software Engineer)** | Singapore | April 2020 – March 2021  
 **Amadeus IT Graduate (Technical Business Analyst)** | Singapore | July 2018 – March 2020
@@ -49,25 +50,26 @@ API • Postman • Agile • Scrum • Product specification • Design thinkin
 - Launched cross-functional biometric initiative pilot in 2019 with Ljubljana Airport, attaining a 75% success rate.
 - Redesigned our SaaS-based airport map UI following the industry standard to support up to 5x more data on the viewport.
 
-### WORKS APPLICATIONS CO., LTD.
+### Works Applications Co., Ltd.
 
 **Software Engineer** | Singapore | October 2017 – June 2018
 
 - Implemented new features of a mobile application for human resource management in plain JavaScript.
 - Designed various ways to improve application usability and reduce user input using InVision.
 
-## EDUCATION
+## Education
 
-### KELLOGG SCHOOL OF MANAGEMENT (NORTHWESTERN UNIVERSITY)
+### Kellogg School of Management (Northwestern University)
 
 **Product Strategy Executive Education** | March 2024 – May 2024
 
-### SINGAPORE UNIVERSITY OF TECHNOLOGY AND DESIGN
+### Singapore University of Technology and Design
 
-**Bachelor of Engineering (Product Development)** | May 2013 – September 2016  
+**Bachelor of Engineering (Product Development)** | May 2013 – September 2016
+
 Summa Cum Laude, CGPA: 4.96/5.00
 
-## AWARDS AND CERTIFICATIONS
+## Awards and Certifications
 
 - Value Star Award - "We Serve" (Marketplace Product Manager) | May 2022
 - Advanced Certified Scrum Product Owner® | January 2021
