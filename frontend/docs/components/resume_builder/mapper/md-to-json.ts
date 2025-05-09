@@ -77,7 +77,7 @@ function parseHeader(headerSection: string): Header {
   const name = lines[0].replace("# ", "").trim();
 
   // Extract contact information from second line
-  const contactLine = lines[1];
+  const contactLine = lines[2];
   const contactItems = contactLine.match(/\[.*?\]|\(.*?\)|[^|]+/g) || [];
 
   // Clean up contact items
@@ -143,12 +143,10 @@ function parseWork(workSection: string): Work[] {
 
   companyBlocks.forEach((block) => {
     const lines = block.trim().split("\n");
-    console.log(lines);
     const companyLine = lines[0].replace("### ", "").trim();
 
     // Assume second line contains title, location, and period
     const detailsLine = lines[2];
-    console.log(detailsLine);
     const [titlePart, locationPart, periodPart] = detailsLine
       .split("|")
       .map((part) => part.trim());
@@ -165,8 +163,8 @@ function parseWork(workSection: string): Work[] {
       .trim();
 
     // Parse period for the designation
-    console.log(periodPart);
     const periodMatch = periodPart.match(/(\w+ \d{4}).*?(\w+ \d{4}|Present)/);
+    console.log(periodMatch);
     const start = periodMatch ? periodMatch[1] : "";
     const end = periodMatch ? periodMatch[2] : "";
 
@@ -190,7 +188,7 @@ function parseWork(workSection: string): Work[] {
       title: currentTitle,
       start,
       end,
-      descriptions,
+      descriptions: [],
     };
 
     designations.push(designation);
@@ -199,7 +197,7 @@ function parseWork(workSection: string): Work[] {
       company,
       location,
       designations,
-      descriptions: [], // We're putting descriptions in the designations, not at top level
+      descriptions,
     });
   });
 
@@ -222,26 +220,23 @@ function parseEducation(educationSection: string): Education[] {
     const institution = lines[0].replace("### ", "").trim();
 
     // Qualification on second line
-    const qualificationLine = lines[1];
-    const qualification = [
-      qualificationLine.replace("**", "").replace("**", "").trim(),
-    ];
+    const qualificationLine = lines[2];
+    console.log(lines);
+
+    const [qualification, periodPart] = qualificationLine
+      .split("|")
+      .map((part) => part.trim());
 
     // Period on the same line as qualification or next line
-    const periodMatch = qualificationLine.match(/\|(.*?)(\d{4}).*?(\d{4})/);
-
-    let start = "";
-    let end = "";
+    const periodMatch = periodPart.match(/(\w+ \d{4}).*?(\w+ \d{4}|Present)/);
+    console.log(periodMatch);
+    const start = periodMatch ? periodMatch[1] : "";
+    const end = periodMatch ? periodMatch[2] : "";
     let honorsAndGrade: string | undefined;
 
-    if (periodMatch) {
-      start = periodMatch[2];
-      end = periodMatch[3];
-    }
-
     // Check if there's an honors line
-    if (lines.length > 2) {
-      const potentialHonorsLine = lines[2].trim();
+    if (lines.length > 3) {
+      const potentialHonorsLine = lines[3].trim();
       if (
         !potentialHonorsLine.startsWith("###") &&
         potentialHonorsLine !== ""

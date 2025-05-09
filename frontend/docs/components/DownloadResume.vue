@@ -4,13 +4,14 @@ import jsPDF from 'jspdf'
 import { Resume } from './resume_builder/models'
 import { Cursor } from './resume_builder/class'
 import { parseResumeMarkdown } from './resume_builder/mapper'
+import { OnePageStandard } from './resume_builder/templates/one-page-standard/constants';
 import { generateOnePageStandardPDF } from './resume_builder/templates/one-page-standard/logic'
 
 // Props for customization
 defineProps({
     filename: {
         type: String,
-        default: 'resume.pdf'
+        default: 'Stevanus SATRIA.pdf'
     },
     buttonText: {
         type: String,
@@ -125,11 +126,7 @@ function downloadResume() {
         })
 
         // Initialize cursor for PDF generation
-        const cursor: Cursor = {
-            x: 10,
-            y: 10,
-            size: 10,
-        }
+        const cursor = new Cursor(0, 0, OnePageStandard.HEADER_FONT_SIZE)
 
         // Call the provided function to generate the PDF
         // Note: This function is assumed to be imported or defined elsewhere

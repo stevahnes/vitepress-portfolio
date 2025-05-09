@@ -18,7 +18,6 @@ export function constructHeader(
   pageParameters: FormatParameters,
 ): void {
   /** Construct Title */
-  console.log(cursor);
   cursor.setSize(standard.HEADER_FONT_SIZE);
   updateFontAndSize(
     jsPDFInstance,
