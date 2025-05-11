@@ -21,11 +21,12 @@ const startY = ref(0);
 const startHeight = ref(0);
 const chatHeight = ref(400);
 const clientSideTheme = ref(false);
+const isEndingChat = ref(false);
 
 // DOM refs
-const inputRef = ref(null);
-const chatContainerRef = ref(null);
-const chatWindowRef = ref(null);
+const inputRef = ref<HTMLInputElement | null>(null);
+const chatContainerRef = ref<HTMLDivElement | null>(null);
+const chatWindowRef = ref<HTMLDivElement | null>(null);
 
 // Theme handling
 const { isDark } = useData();
@@ -99,7 +100,7 @@ const sendMessage = async () => {
   if (!userInput.value.trim()) return;
 
   // Add user message
-  const userMessage = {
+  const userMessage: Message = {
     role: 'user',
     content: userInput.value,
     timestamp: Date.now()
@@ -126,8 +127,9 @@ const sendMessage = async () => {
 
     if (!response.body) throw new Error('No response body');
 
-    if (response.headers.get('lb-thread-id') && typeof localStorage !== 'undefined') {
-      localStorage.setItem('threadId', response.headers.get('lb-thread-id'));
+    const threadIdHeader = response.headers.get('lb-thread-id');
+    if (threadIdHeader && typeof localStorage !== 'undefined') {
+      localStorage.setItem('threadId', threadIdHeader);
     }
 
     // Process streaming response
@@ -189,9 +191,69 @@ const sendMessage = async () => {
   }
 };
 
+// Add endChat function
+const endChat = async () => {
+  if (isEndingChat.value) return;
+
+  const threadId = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
+  if (!threadId) return;
+
+  isEndingChat.value = true;
+  try {
+    const response = await fetch('https://advocado-agent.vercel.app/thread/resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ threadId: threadId as string })
+    });
+
+    if (!response.ok) throw new Error('Failed to end chat');
+
+    // Clear the thread ID from localStorage
+    localStorage.removeItem('threadId');
+
+    // Add a system message indicating chat has ended
+    const endMessage: Message = {
+      role: 'assistant',
+      content: 'Chat session has ended. Feel free to start a new conversation!',
+      timestamp: Date.now()
+    };
+    messages.value.push(endMessage);
+  } catch (error) {
+    console.error('Error ending chat:', error);
+    const errorMessage: Message = {
+      role: 'assistant',
+      content: 'Failed to end chat session. Please try again.',
+      timestamp: Date.now()
+    };
+    messages.value.push(errorMessage);
+  } finally {
+    isEndingChat.value = false;
+  }
+};
+
 // Lifecycle hooks
-onMounted(() => {
+onMounted(async () => {
   clientSideTheme.value = true;
+
+  // Clear any existing threadId on page load and mark it as resolved
+  if (typeof localStorage !== 'undefined') {
+    const existingThreadId = localStorage.getItem('threadId');
+    if (existingThreadId) {
+      try {
+        // Mark the thread as resolved before clearing
+        await fetch('https://advocado-agent.vercel.app/thread/resolve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ threadId: existingThreadId })
+        });
+      } catch (error) {
+        console.error('Error marking existing thread as resolved:', error);
+      } finally {
+        // Clear the threadId regardless of whether the update succeeded
+        localStorage.removeItem('threadId');
+      }
+    }
+  }
 
   if (chatWindowRef.value && typeof localStorage !== 'undefined') {
     const savedHeight = localStorage.getItem('chatHeight');
@@ -214,10 +276,19 @@ watch(isDark, () => { }, { immediate: true });
   ]">
     <!-- Header -->
     <div
-      :class="['!mb-4 !pb-3 flex items-center', clientSideTheme && isDark ? '!border-b !border-gray-700' : '!border-b !border-gray-200']">
-      <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
-      <h3 :class="clientSideTheme && isDark ? '!text-gray-100 !font-medium' : '!text-gray-800 !font-medium'">Chat with
-        Advocado 🥑</h3>
+      :class="['!mb-4 !pb-3 flex items-center justify-between', clientSideTheme && isDark ? '!border-b !border-gray-700' : '!border-b !border-gray-200']">
+      <div class="flex items-center">
+        <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
+        <h3 :class="clientSideTheme && isDark ? '!text-gray-100 !font-medium' : '!text-gray-800 !font-medium'">Chat with
+          Advocado 🥑</h3>
+      </div>
+      <button @click="endChat" :disabled="isEndingChat" :class="[
+        '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
+        '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
+        isEndingChat && '!opacity-50 !cursor-not-allowed'
+      ]">
+        {{ isEndingChat ? 'Ending...' : 'End Chat' }}
+      </button>
     </div>
 
     <!-- Messages area -->

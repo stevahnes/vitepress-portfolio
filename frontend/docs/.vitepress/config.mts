@@ -295,6 +295,6 @@ export default defineConfig({
   },
 
   vite: {
-    plugins: [tailwindcss(), ViteImageOptimizer()],
+    plugins: [tailwindcss(), ViteImageOptimizer()] as any,
   },
 });
