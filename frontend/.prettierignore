@@ -1,0 +1,21 @@
+# Ignore build outputs
+**/dist
+**/.vitepress/dist
+**/.vitepress/cache
+**/.output
+
+# Ignore cache
+**/.vite
+**/.cache
+
+# Ignore dependencies
+/node_modules
+
+# Ignore lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Ignore other common unnecessary files
+.DS_Store
+.env* 

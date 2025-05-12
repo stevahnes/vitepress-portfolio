@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint --fix",
     "format": "prettier .  --write",
-    "docs:build": "vitepress build docs",
+    "docs:build": "npm run lint & npm run format & vitepress build docs",
     "docs:dev": "vitepress dev docs",
     "docs:update-package": "npx vp-update",
     "docs:preview": "vitepress preview docs"

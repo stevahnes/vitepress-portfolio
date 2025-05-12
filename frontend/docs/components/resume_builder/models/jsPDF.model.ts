@@ -15,6 +15,6 @@ export interface FormatParameters {
   PORTRAIT_HEIGHT: number;
 }
 
-type Orientation = 'p' | 'portrait' | 'landscape';
+type Orientation = "p" | "portrait" | "landscape";
 
-type Unit = 'pt' | 'px' | 'in' | 'mm' | 'cm' | 'ex' | 'em' | 'pc';
+type Unit = "pt" | "px" | "in" | "mm" | "cm" | "ex" | "em" | "pc";
