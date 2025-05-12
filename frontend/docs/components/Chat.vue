@@ -3,35 +3,33 @@ import { ref, nextTick, onMounted, watch, computed } from 'vue';
 import { marked } from 'marked';
 import { useData } from 'vitepress';
 
-// Interfaces
+// --- Types ---
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: number;
 }
 
-// State management
-// TODO: WIP - Thread functionality is currently disabled as the get thread route is returning 404
-// The following features are temporarily disabled:
-// - End Chat button and functionality
-// - Thread resolution
+// --- State ---
 const userInput = ref('');
-const messages = ref<Message[]>([]);  // Start with empty messages
+const messages = ref<Message[]>([]);
 const loading = ref(false);
 const isInitialLoading = ref(false);
 const isDragging = ref(false);
-const startY = ref(0);
-const startHeight = ref(0);
 const chatHeight = ref(400);
 const clientSideTheme = ref(false);
-const isClient = ref(false);  // Add client-side detection
+const isClient = ref(false);
+const isEndingChat = ref(false);
+const showFeedbackModal = ref(false);
+const feedback = ref<'good' | 'bad' | null>(null);
+const threadId = ref<string | null>(null);
 
-// DOM refs
+// --- DOM Refs ---
 const inputRef = ref<HTMLInputElement | null>(null);
 const chatContainerRef = ref<HTMLDivElement | null>(null);
 const chatWindowRef = ref<HTMLDivElement | null>(null);
 
-// Theme handling
+// --- Theme ---
 const { isDark } = useData();
 const cssVars = computed(() => ({
   '--scrollbar-thumb': clientSideTheme.value && isDark.value ? '#4a5568' : '#cbd5e0',
@@ -42,29 +40,26 @@ const cssVars = computed(() => ({
   '--blockquote-border-color': clientSideTheme.value && isDark.value ? '#4a5568' : '#cbd5e0',
 }));
 
-// Utility functions
-const formatTime = (timestamp) => new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-const parseMarkdown = (content) => marked.parse(content);
+// --- Computed ---
+const hasOngoingThread = computed(() => !!threadId.value);
+
+// --- Utility Functions ---
+const formatTime = (timestamp: number) => new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const parseMarkdown = (content: string) => marked.parse(content);
 
 const scrollToBottom = async () => {
   await nextTick();
-  if (chatContainerRef.value) {
-    chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
-  }
+  chatContainerRef.value && (chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight);
 };
 
-// Resize functionality - now supporting both mouse and touch events
-const startResize = (e) => {
+// --- Chat Window Resize ---
+const startResize = (e: MouseEvent | TouchEvent) => {
   e.preventDefault();
   isDragging.value = true;
-
-  // Handle both mouse and touch events
-  const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-  startY.value = clientY;
-  startHeight.value = chatHeight.value;
-
-  // Add appropriate event listeners based on event type
-  if (e.type.includes('touch')) {
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+  (startResize as any).startY = clientY;
+  (startResize as any).startHeight = chatHeight.value;
+  if ('touches' in e) {
     document.addEventListener('touchmove', handleTouchResize, { passive: false });
     document.addEventListener('touchend', stopResize);
   } else {
@@ -72,102 +67,72 @@ const startResize = (e) => {
     document.addEventListener('mouseup', stopResize);
   }
 };
-
-const handleMouseResize = (e) => {
+const handleMouseResize = (e: MouseEvent) => {
   if (!isDragging.value) return;
-  const deltaY = e.clientY - startY.value;
-  chatHeight.value = Math.max(200, startHeight.value + deltaY);
+  const deltaY = e.clientY - (startResize as any).startY;
+  chatHeight.value = Math.max(200, (startResize as any).startHeight + deltaY);
 };
-
-const handleTouchResize = (e) => {
+const handleTouchResize = (e: TouchEvent) => {
   if (!isDragging.value) return;
-  e.preventDefault(); // Prevent scrolling while resizing
-  const deltaY = e.touches[0].clientY - startY.value;
-  chatHeight.value = Math.max(200, startHeight.value + deltaY);
+  e.preventDefault();
+  const deltaY = e.touches[0].clientY - (startResize as any).startY;
+  chatHeight.value = Math.max(200, (startResize as any).startHeight + deltaY);
 };
-
 const stopResize = () => {
   isDragging.value = false;
   document.removeEventListener('mousemove', handleMouseResize);
   document.removeEventListener('mouseup', stopResize);
   document.removeEventListener('touchmove', handleTouchResize);
   document.removeEventListener('touchend', stopResize);
-
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('chatHeight', chatHeight.value.toString());
   }
 };
 
-// Message handling
+// --- Message Handling ---
 const sendMessage = async () => {
   if (!userInput.value.trim()) return;
-
-  // Add user message
-  const userMessage: Message = {
-    role: 'user',
-    content: userInput.value,
-    timestamp: Date.now()
-  };
-  messages.value.push(userMessage);
-
+  messages.value.push({ role: 'user', content: userInput.value, timestamp: Date.now() });
   let currentAssistantContent = '';
   let assistantMessageAdded = false;
   loading.value = true;
-
   try {
-    const threadId = isClient.value ? localStorage.getItem('threadId') : null;
-    // Build request body, only include threadId if it exists
     const requestBody: any = {
       stream: true,
       rawResponse: true,
       messages: [{ role: 'user', content: userInput.value }]
     };
-    if (threadId) {
-      requestBody.threadId = threadId;
-    }
-
+    if (threadId.value) requestBody.threadId = threadId.value;
     const response = await fetch('https://advocado-agent.vercel.app/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
-
     if (!response.body) throw new Error('No response body');
-
     const threadIdHeader = response.headers.get('lb-thread-id');
     if (threadIdHeader && isClient.value) {
       localStorage.setItem('threadId', threadIdHeader);
+      threadId.value = threadIdHeader;
     }
-
-    // Process streaming response
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
-
       for (const line of lines) {
         if (!line.trim()) continue;
         try {
           const parsed = JSON.parse(line);
           const delta = parsed.choices[0]?.delta;
-
           if (delta?.content) {
             if (!assistantMessageAdded) {
-              messages.value.push({
-                role: 'assistant',
-                content: '',
-                timestamp: Date.now()
-              });
+              messages.value.push({ role: 'assistant', content: '', timestamp: Date.now() });
               assistantMessageAdded = true;
             }
-
             currentAssistantContent += delta.content;
             messages.value[messages.value.length - 1].content = currentAssistantContent;
             messages.value = [...messages.value];
@@ -180,90 +145,81 @@ const sendMessage = async () => {
     }
   } catch (error) {
     console.error('Error during streaming:', error);
-
     if (!assistantMessageAdded) {
-      messages.value.push({
-        role: 'assistant',
-        content: '[Error receiving response]',
-        timestamp: Date.now()
-      });
+      messages.value.push({ role: 'assistant', content: '[Error receiving response]', timestamp: Date.now() });
     } else if (currentAssistantContent.trim() === '') {
       messages.value[messages.value.length - 1].content = '[Error receiving response]';
     }
   } finally {
     loading.value = false;
     userInput.value = '';
-    if (inputRef.value) inputRef.value.focus();
+    inputRef.value?.focus();
     await scrollToBottom();
   }
 };
 
-// Add endChat function
-/*
-const endChat = async () => {
-  if (isEndingChat.value) return;
-
-  const threadId = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
-  if (!threadId) return;
-
+// --- End Chat & Feedback Modal ---
+const endChat = () => {
+  if (isEndingChat.value || showFeedbackModal.value) return;
+  if (!threadId.value) return;
+  showFeedbackModal.value = true;
+  feedback.value = null;
+};
+const submitFeedback = async () => {
+  if (!feedback.value || isEndingChat.value) return;
   isEndingChat.value = true;
   try {
+    if (!threadId.value) return;
     const response = await fetch('https://advocado-agent.vercel.app/thread/resolve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ threadId: threadId as string })
+      body: JSON.stringify({ threadId: threadId.value, feedback: feedback.value })
     });
-
     if (!response.ok) throw new Error('Failed to end chat');
-
-    // Clear the thread ID from localStorage
     localStorage.removeItem('threadId');
-
-    // Add a system message indicating chat has ended
-    const endMessage: Message = {
+    threadId.value = null;
+    messages.value.push({
       role: 'assistant',
-      content: 'Chat session has ended. Feel free to start a new conversation!',
+      content: 'Chat session has ended. Ask me anything to start a new conversation!',
       timestamp: Date.now()
-    };
-    messages.value.push(endMessage);
+    });
   } catch (error) {
     console.error('Error ending chat:', error);
-    const errorMessage: Message = {
+    messages.value.push({
       role: 'assistant',
       content: 'Failed to end chat session. Please try again.',
       timestamp: Date.now()
-    };
-    messages.value.push(errorMessage);
+    });
   } finally {
     isEndingChat.value = false;
+    showFeedbackModal.value = false;
+    feedback.value = null;
   }
 };
-*/
+const closeFeedbackModal = () => {
+  showFeedbackModal.value = false;
+  feedback.value = null;
+};
 
-// Lifecycle hooks
+// --- Initial Load ---
 onMounted(async () => {
-  isClient.value = true;  // Mark as client-side
+  isClient.value = true;
   clientSideTheme.value = true;
-
-  // Initialize with welcome message if no messages exist
+  threadId.value = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
   if (messages.value.length === 0) {
     messages.value = [
       { role: 'assistant', content: 'Hi! What would you like to learn about Steve today?', timestamp: Date.now() }
     ];
   }
-
-  if (isClient.value) {  // Only access browser APIs on client
+  if (isClient.value) {
     const existingThreadId = localStorage.getItem('threadId');
     if (existingThreadId) {
       isInitialLoading.value = true;
       try {
-        // Fetch thread messages
         const messagesResponse = await fetch(`https://advocado-agent.vercel.app/thread/listMessages?threadId=${existingThreadId}`);
         const messagesData = await messagesResponse.json();
-
         if (messagesData && Array.isArray(messagesData)) {
-          // Convert the messages to our format and add timestamps
-          messages.value = messagesData.map(msg => ({
+          messages.value = messagesData.map((msg: any) => ({
             role: msg.role,
             content: msg.content,
             timestamp: msg.created_at || Date.now()
@@ -271,7 +227,6 @@ onMounted(async () => {
         }
       } catch (error) {
         console.error('Error fetching thread messages:', error);
-        // If there's an error, start with the default message
         messages.value = [
           { role: 'assistant', content: 'Hi! What would you like to learn about Steve today?', timestamp: Date.now() }
         ];
@@ -279,25 +234,24 @@ onMounted(async () => {
         isInitialLoading.value = false;
       }
     }
-
     if (chatWindowRef.value) {
       const savedHeight = localStorage.getItem('chatHeight');
       if (savedHeight) chatHeight.value = parseInt(savedHeight);
     }
   }
-
   scrollToBottom();
-  if (inputRef.value) inputRef.value.focus();
+  inputRef.value?.focus();
 });
 
-// Watchers
+// --- Watchers ---
 watch(messages, () => scrollToBottom(), { deep: true });
 watch(isDark, () => { }, { immediate: true });
 </script>
 
 <template>
   <div v-if="isClient" ref="chatWindowRef" :style="{ height: `${chatHeight}px`, ...cssVars }" :class="[
-    '!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative',
+    '!relative',
+    '!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg',
     clientSideTheme && isDark ? '!border !border-gray-700 !bg-gray-900' : '!border !border-gray-200 !bg-gray-50'
   ]">
     <!-- Header -->
@@ -308,15 +262,13 @@ watch(isDark, () => { }, { immediate: true });
         <h3 :class="clientSideTheme && isDark ? '!text-gray-100 !font-medium' : '!text-gray-800 !font-medium'">Chat with
           Advocado 🥑</h3>
       </div>
-      <!-- End Chat button temporarily disabled
-      <button @click="endChat" :disabled="isEndingChat" :class="[
+      <button v-if="hasOngoingThread" @click="endChat" :disabled="isEndingChat" :class="[
         '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
         '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
         isEndingChat && '!opacity-50 !cursor-not-allowed'
       ]">
         {{ isEndingChat ? 'Ending...' : 'End Chat' }}
       </button>
-      -->
     </div>
 
     <!-- Initial loading indicator -->
@@ -406,7 +358,65 @@ watch(isDark, () => { }, { immediate: true });
         <div v-else class="!h-5 !w-5 !border-2 !border-t-transparent !border-white !rounded-full !animate-spin"></div>
       </button>
     </form>
+
+    <!-- Feedback Modal (inside chat window) -->
+    <div v-if="showFeedbackModal" class="!absolute !inset-0 !flex !items-center !justify-center !z-50">
+      <div :class="[
+        '!absolute !inset-0',
+        clientSideTheme && isDark ? '!bg-black !bg-opacity-60' : '!bg-white !bg-opacity-60'
+      ]"></div>
+      <div :class="[
+        '!relative !rounded-lg !p-6 !w-96 !shadow-xl',
+        clientSideTheme && isDark ? '!bg-gray-800 !text-white' : '!bg-white !text-gray-800'
+      ]">
+        <h3 :class="[
+          '!text-lg !font-medium !mb-4',
+          clientSideTheme && isDark ? '!text-white' : '!text-gray-900'
+        ]">How was your chat experience?</h3>
+        <div class="!flex !space-x-4 !mb-6">
+          <button @click="feedback = 'good'" :class="[
+            '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
+            feedback === 'good'
+              ? '!bg-green-500 !text-white'
+              : clientSideTheme && isDark
+                ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+                : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200'
+          ]">
+            Good 👍
+          </button>
+          <button @click="feedback = 'bad'" :class="[
+            '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
+            feedback === 'bad'
+              ? '!bg-red-500 !text-white'
+              : clientSideTheme && isDark
+                ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+                : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200'
+          ]">
+            Bad 👎
+          </button>
+        </div>
+        <div class="!flex !justify-end !space-x-3">
+          <button @click="closeFeedbackModal" :class="[
+            '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
+            clientSideTheme && isDark
+              ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+              : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200'
+          ]">
+            Cancel
+          </button>
+          <button @click="submitFeedback" :disabled="!feedback || isEndingChat" :class="[
+            '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
+            !feedback || isEndingChat
+              ? '!bg-gray-400 !text-white !cursor-not-allowed'
+              : '!bg-indigo-600 !text-white !hover:bg-indigo-700'
+          ]">
+            {{ isEndingChat ? 'Ending...' : 'End Chat' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
   <div v-else
     class="!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative !border !border-gray-200 !bg-gray-50">
     <div class="!mb-4 !pb-3 !flex !items-center !justify-between !border-b !border-gray-200">
