@@ -11,17 +11,20 @@ interface Message {
 }
 
 // State management
+// TODO: WIP - Thread functionality is currently disabled as the get thread route is returning 404
+// The following features are temporarily disabled:
+// - End Chat button and functionality
+// - Thread resolution
 const userInput = ref('');
-const messages = ref<Message[]>([
-  { role: 'assistant', content: 'Hi! What would you like to learn about Steve today?', timestamp: Date.now() },
-]);
+const messages = ref<Message[]>([]);  // Start with empty messages
 const loading = ref(false);
+const isInitialLoading = ref(false);
 const isDragging = ref(false);
 const startY = ref(0);
 const startHeight = ref(0);
 const chatHeight = ref(400);
 const clientSideTheme = ref(false);
-const isEndingChat = ref(false);
+const isClient = ref(false);  // Add client-side detection
 
 // DOM refs
 const inputRef = ref<HTMLInputElement | null>(null);
@@ -112,7 +115,7 @@ const sendMessage = async () => {
   loading.value = true;
 
   try {
-    const threadId = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
+    const threadId = isClient.value ? localStorage.getItem('threadId') : null;
 
     const response = await fetch('https://advocado-agent.vercel.app/chat', {
       method: 'POST',
@@ -128,7 +131,7 @@ const sendMessage = async () => {
     if (!response.body) throw new Error('No response body');
 
     const threadIdHeader = response.headers.get('lb-thread-id');
-    if (threadIdHeader && typeof localStorage !== 'undefined') {
+    if (threadIdHeader && isClient.value) {
       localStorage.setItem('threadId', threadIdHeader);
     }
 
@@ -192,6 +195,7 @@ const sendMessage = async () => {
 };
 
 // Add endChat function
+/*
 const endChat = async () => {
   if (isEndingChat.value) return;
 
@@ -230,34 +234,52 @@ const endChat = async () => {
     isEndingChat.value = false;
   }
 };
+*/
 
 // Lifecycle hooks
 onMounted(async () => {
+  isClient.value = true;  // Mark as client-side
   clientSideTheme.value = true;
 
-  // Clear any existing threadId on page load and mark it as resolved
-  if (typeof localStorage !== 'undefined') {
-    const existingThreadId = localStorage.getItem('threadId');
-    if (existingThreadId) {
-      try {
-        // Mark the thread as resolved before clearing
-        await fetch('https://advocado-agent.vercel.app/thread/resolve', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ threadId: existingThreadId })
-        });
-      } catch (error) {
-        console.error('Error marking existing thread as resolved:', error);
-      } finally {
-        // Clear the threadId regardless of whether the update succeeded
-        localStorage.removeItem('threadId');
-      }
-    }
+  // Initialize with welcome message if no messages exist
+  if (messages.value.length === 0) {
+    messages.value = [
+      { role: 'assistant', content: 'Hi! What would you like to learn about Steve today?', timestamp: Date.now() }
+    ];
   }
 
-  if (chatWindowRef.value && typeof localStorage !== 'undefined') {
-    const savedHeight = localStorage.getItem('chatHeight');
-    if (savedHeight) chatHeight.value = parseInt(savedHeight);
+  if (isClient.value) {  // Only access browser APIs on client
+    const existingThreadId = localStorage.getItem('threadId');
+    if (existingThreadId) {
+      isInitialLoading.value = true;
+      try {
+        // Fetch thread messages
+        const messagesResponse = await fetch(`https://advocado-agent.vercel.app/thread/listMessages?threadId=${existingThreadId}`);
+        const messagesData = await messagesResponse.json();
+
+        if (messagesData && Array.isArray(messagesData)) {
+          // Convert the messages to our format and add timestamps
+          messages.value = messagesData.map(msg => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.created_at || Date.now()
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching thread messages:', error);
+        // If there's an error, start with the default message
+        messages.value = [
+          { role: 'assistant', content: 'Hi! What would you like to learn about Steve today?', timestamp: Date.now() }
+        ];
+      } finally {
+        isInitialLoading.value = false;
+      }
+    }
+
+    if (chatWindowRef.value) {
+      const savedHeight = localStorage.getItem('chatHeight');
+      if (savedHeight) chatHeight.value = parseInt(savedHeight);
+    }
   }
 
   scrollToBottom();
@@ -270,18 +292,19 @@ watch(isDark, () => { }, { immediate: true });
 </script>
 
 <template>
-  <div ref="chatWindowRef" :style="{ height: `${chatHeight}px`, ...cssVars }" :class="[
-    'flex w-full flex-col rounded-lg !p-4 !shadow-lg relative',
+  <div v-if="isClient" ref="chatWindowRef" :style="{ height: `${chatHeight}px`, ...cssVars }" :class="[
+    '!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative',
     clientSideTheme && isDark ? '!border !border-gray-700 !bg-gray-900' : '!border !border-gray-200 !bg-gray-50'
   ]">
     <!-- Header -->
     <div
-      :class="['!mb-4 !pb-3 flex items-center justify-between', clientSideTheme && isDark ? '!border-b !border-gray-700' : '!border-b !border-gray-200']">
-      <div class="flex items-center">
+      :class="['!mb-4 !pb-3 !flex !items-center !justify-between', clientSideTheme && isDark ? '!border-b !border-gray-700' : '!border-b !border-gray-200']">
+      <div class="!flex !items-center">
         <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
         <h3 :class="clientSideTheme && isDark ? '!text-gray-100 !font-medium' : '!text-gray-800 !font-medium'">Chat with
           Advocado 🥑</h3>
       </div>
+      <!-- End Chat button temporarily disabled
       <button @click="endChat" :disabled="isEndingChat" :class="[
         '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
         '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
@@ -289,11 +312,20 @@ watch(isDark, () => { }, { immediate: true });
       ]">
         {{ isEndingChat ? 'Ending...' : 'End Chat' }}
       </button>
+      -->
+    </div>
+
+    <!-- Initial loading indicator -->
+    <div v-if="isInitialLoading" class="!flex-1 !flex !items-center !justify-center">
+      <div class="!flex !flex-col !items-center !space-y-4">
+        <div class="!h-8 !w-8 !border-4 !border-indigo-600 !border-t-transparent !rounded-full !animate-spin"></div>
+        <p :class="clientSideTheme && isDark ? '!text-gray-300' : '!text-gray-600'">Loading conversation...</p>
+      </div>
     </div>
 
     <!-- Messages area -->
-    <div ref="chatContainerRef" class="flex-1 !overflow-auto !space-y-4 flex flex-col !px-1">
-      <div v-for="(msg, index) in messages" :key="index" class="flex w-full !mb-3"
+    <div v-else ref="chatContainerRef" class="!flex-1 !overflow-auto !space-y-4 !flex !flex-col !px-1">
+      <div v-for="(msg, index) in messages" :key="index" class="!flex !w-full !mb-3"
         :class="[msg.role === 'user' ? '!justify-end' : '!justify-start']">
         <div v-if="msg.content.trim().length > 0" :class="[
           '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
@@ -317,7 +349,7 @@ watch(isDark, () => { }, { immediate: true });
       </div>
 
       <!-- Typing indicator -->
-      <div v-if="loading" class="flex !justify-start !w-full">
+      <div v-if="loading" class="!flex !justify-start !w-full">
         <div :class="[
           '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
           clientSideTheme && isDark ? '!bg-gray-800 !text-gray-300 !border !border-gray-700' : '!bg-white !text-gray-600 !border !border-gray-200'
@@ -344,7 +376,7 @@ watch(isDark, () => { }, { immediate: true });
       </div>
     </div>
 
-    <!-- Resize handle with both mouse and touch event listeners -->
+    <!-- Resize handle -->
     <div
       class="!h-2 !w-full !cursor-ns-resize !flex !justify-center !items-center hover:!bg-gray-300 dark:hover:!bg-gray-700 !transition-colors !rounded-b-lg"
       @mousedown="startResize" @touchstart="startResize">
@@ -353,11 +385,11 @@ watch(isDark, () => { }, { immediate: true });
 
     <!-- Input form -->
     <form @submit.prevent="sendMessage" :class="[
-      '!mt-4 flex !rounded-lg !overflow-hidden !shadow-md',
+      '!mt-4 !flex !rounded-lg !overflow-hidden !shadow-md',
       clientSideTheme && isDark ? '!bg-gray-800 !border !border-gray-700' : '!bg-gray-100 !border !border-gray-200'
     ]">
       <input ref="inputRef" v-model="userInput" type="text" placeholder="Ask something about Steve..." :class="[
-        'flex-1 !border-0 !p-3 !outline-none !focus:ring-0 !focus:ring-offset-0',
+        '!flex-1 !border-0 !p-3 !outline-none !focus:ring-0 !focus:ring-offset-0',
         clientSideTheme && isDark ? '!bg-gray-800 !text-gray-100 !placeholder-gray-500' : '!bg-gray-100 !text-gray-800 !placeholder-gray-400'
       ]" :disabled="loading" />
       <button type="submit"
@@ -371,9 +403,22 @@ watch(isDark, () => { }, { immediate: true });
       </button>
     </form>
   </div>
+  <div v-else
+    class="!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative !border !border-gray-200 !bg-gray-50">
+    <div class="!mb-4 !pb-3 !flex !items-center !justify-between !border-b !border-gray-200">
+      <div class="!flex !items-center">
+        <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
+        <h3 class="!text-gray-800 !font-medium">Chat with Advocado 🥑</h3>
+      </div>
+    </div>
+    <div class="!flex-1 !flex !items-center !justify-center">
+      <p class="!text-gray-600">Loading chat...</p>
+    </div>
+  </div>
 </template>
 
 <style scoped>
+/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -389,19 +434,6 @@ watch(isDark, () => { }, { immediate: true });
 
 ::-webkit-scrollbar-track {
   background: var(--scrollbar-track);
-}
-
-/* Essential styles */
-.flex {
-  display: flex !important;
-}
-
-.flex-col {
-  flex-direction: column !important;
-}
-
-.flex-1 {
-  flex: 1 1 0% !important;
 }
 
 /* Markdown styling */
