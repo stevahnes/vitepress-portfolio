@@ -7,7 +7,8 @@ const langbase = new Langbase({
 
 export async function POST(req: NextRequest) {
   try {
-    const { threadId } = await req.json();
+    const { threadId, feedback } = await req.json();
+    console.log("Thread/resolve route - Received:", { threadId, feedback });
 
     if (!threadId) {
       return NextResponse.json(
@@ -16,19 +17,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Close the thread using Langbase SDK
-    await langbase.threads.update({
+    if (!feedback || !["good", "bad"].includes(feedback)) {
+      return NextResponse.json(
+        { error: "Feedback must be either 'good' or 'bad'" },
+        { status: 400 }
+      );
+    }
+
+    // Resolve thread with feedback metadata
+    const result = await langbase.threads.update({
       threadId,
       metadata: {
         status: "resolved",
+        feedback: feedback,
       },
     });
 
+    if (!result) {
+      return NextResponse.json(
+        { error: "Failed to resolve thread" },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error closing thread:", error);
+    console.error("Error resolving thread:", error);
     return NextResponse.json(
-      { error: "Failed to close thread" },
+      { error: "Failed to resolve thread" },
       { status: 500 }
     );
   }

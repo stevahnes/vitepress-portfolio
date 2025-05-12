@@ -25,6 +25,10 @@ const startHeight = ref(0);
 const chatHeight = ref(400);
 const clientSideTheme = ref(false);
 const isClient = ref(false);  // Add client-side detection
+const isEndingChat = ref(false);  // Add this line for end chat state
+const showFeedbackModal = ref(false);  // Add this for feedback modal
+const feedback = ref<'good' | 'bad' | null>(null);  // Add this for feedback state
+const threadId = ref<string | null>(null);
 
 // DOM refs
 const inputRef = ref<HTMLInputElement | null>(null);
@@ -115,15 +119,13 @@ const sendMessage = async () => {
   loading.value = true;
 
   try {
-    const threadId = isClient.value ? localStorage.getItem('threadId') : null;
-    // Build request body, only include threadId if it exists
     const requestBody: any = {
       stream: true,
       rawResponse: true,
       messages: [{ role: 'user', content: userInput.value }]
     };
-    if (threadId) {
-      requestBody.threadId = threadId;
+    if (threadId.value) {
+      requestBody.threadId = threadId.value;
     }
 
     const response = await fetch('https://advocado-agent.vercel.app/chat', {
@@ -137,6 +139,7 @@ const sendMessage = async () => {
     const threadIdHeader = response.headers.get('lb-thread-id');
     if (threadIdHeader && isClient.value) {
       localStorage.setItem('threadId', threadIdHeader);
+      threadId.value = threadIdHeader;
     }
 
     // Process streaming response
@@ -199,30 +202,42 @@ const sendMessage = async () => {
 };
 
 // Add endChat function
-/*
 const endChat = async () => {
   if (isEndingChat.value) return;
 
-  const threadId = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
-  if (!threadId) return;
+  if (!threadId.value) return;
+
+  // Show feedback modal first
+  showFeedbackModal.value = true;
+};
+
+// Add submitFeedback function
+const submitFeedback = async () => {
+  if (!feedback.value) return;
 
   isEndingChat.value = true;
   try {
+    if (!threadId.value) return;
+
     const response = await fetch('https://advocado-agent.vercel.app/thread/resolve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ threadId: threadId as string })
+      body: JSON.stringify({
+        threadId: threadId.value as string,
+        feedback: feedback.value
+      })
     });
 
     if (!response.ok) throw new Error('Failed to end chat');
 
     // Clear the thread ID from localStorage
     localStorage.removeItem('threadId');
+    threadId.value = null;
 
     // Add a system message indicating chat has ended
     const endMessage: Message = {
       role: 'assistant',
-      content: 'Chat session has ended. Feel free to start a new conversation!',
+      content: 'Chat session has ended. Ask me anything to start a new conversation!',
       timestamp: Date.now()
     };
     messages.value.push(endMessage);
@@ -236,14 +251,22 @@ const endChat = async () => {
     messages.value.push(errorMessage);
   } finally {
     isEndingChat.value = false;
+    showFeedbackModal.value = false;
+    feedback.value = null;
   }
 };
-*/
+
+// Add closeFeedbackModal function
+const closeFeedbackModal = () => {
+  showFeedbackModal.value = false;
+  feedback.value = null;
+};
 
 // Lifecycle hooks
 onMounted(async () => {
   isClient.value = true;  // Mark as client-side
   clientSideTheme.value = true;
+  threadId.value = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
 
   // Initialize with welcome message if no messages exist
   if (messages.value.length === 0) {
@@ -293,11 +316,14 @@ onMounted(async () => {
 // Watchers
 watch(messages, () => scrollToBottom(), { deep: true });
 watch(isDark, () => { }, { immediate: true });
+
+const hasOngoingThread = computed(() => !!threadId.value);
 </script>
 
 <template>
   <div v-if="isClient" ref="chatWindowRef" :style="{ height: `${chatHeight}px`, ...cssVars }" :class="[
-    '!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative',
+    '!relative',
+    '!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg',
     clientSideTheme && isDark ? '!border !border-gray-700 !bg-gray-900' : '!border !border-gray-200 !bg-gray-50'
   ]">
     <!-- Header -->
@@ -308,15 +334,13 @@ watch(isDark, () => { }, { immediate: true });
         <h3 :class="clientSideTheme && isDark ? '!text-gray-100 !font-medium' : '!text-gray-800 !font-medium'">Chat with
           Advocado 🥑</h3>
       </div>
-      <!-- End Chat button temporarily disabled
-      <button @click="endChat" :disabled="isEndingChat" :class="[
+      <button v-if="hasOngoingThread" @click="endChat" :disabled="isEndingChat" :class="[
         '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
         '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
         isEndingChat && '!opacity-50 !cursor-not-allowed'
       ]">
         {{ isEndingChat ? 'Ending...' : 'End Chat' }}
       </button>
-      -->
     </div>
 
     <!-- Initial loading indicator -->
@@ -406,7 +430,65 @@ watch(isDark, () => { }, { immediate: true });
         <div v-else class="!h-5 !w-5 !border-2 !border-t-transparent !border-white !rounded-full !animate-spin"></div>
       </button>
     </form>
+
+    <!-- Feedback Modal (inside chat window) -->
+    <div v-if="showFeedbackModal" class="!absolute !inset-0 !flex !items-center !justify-center !z-50">
+      <div :class="[
+        '!absolute !inset-0',
+        clientSideTheme && isDark ? '!bg-black !bg-opacity-60' : '!bg-white !bg-opacity-60'
+      ]"></div>
+      <div :class="[
+        '!relative !rounded-lg !p-6 !w-96 !shadow-xl',
+        clientSideTheme && isDark ? '!bg-gray-800 !text-white' : '!bg-white !text-gray-800'
+      ]">
+        <h3 :class="[
+          '!text-lg !font-medium !mb-4',
+          clientSideTheme && isDark ? '!text-white' : '!text-gray-900'
+        ]">How was your chat experience?</h3>
+        <div class="!flex !space-x-4 !mb-6">
+          <button @click="feedback = 'good'" :class="[
+            '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
+            feedback === 'good'
+              ? '!bg-green-500 !text-white'
+              : clientSideTheme && isDark
+                ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+                : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200'
+          ]">
+            Good 👍
+          </button>
+          <button @click="feedback = 'bad'" :class="[
+            '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
+            feedback === 'bad'
+              ? '!bg-red-500 !text-white'
+              : clientSideTheme && isDark
+                ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+                : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200'
+          ]">
+            Bad 👎
+          </button>
+        </div>
+        <div class="!flex !justify-end !space-x-3">
+          <button @click="closeFeedbackModal" :class="[
+            '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
+            clientSideTheme && isDark
+              ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+              : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200'
+          ]">
+            Cancel
+          </button>
+          <button @click="submitFeedback" :disabled="!feedback || isEndingChat" :class="[
+            '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
+            !feedback || isEndingChat
+              ? '!bg-gray-400 !text-white !cursor-not-allowed'
+              : '!bg-indigo-600 !text-white !hover:bg-indigo-700'
+          ]">
+            {{ isEndingChat ? 'Ending...' : 'End Chat' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
   <div v-else
     class="!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative !border !border-gray-200 !bg-gray-50">
     <div class="!mb-4 !pb-3 !flex !items-center !justify-between !border-b !border-gray-200">
