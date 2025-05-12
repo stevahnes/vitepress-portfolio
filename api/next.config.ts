@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            value: "https://stevanussatria.com, https://www.stevanussatria.com",
+            value: "https://www.stevanussatria.com",
           },
           {
             key: "Access-Control-Allow-Methods",
@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            value: "https://stevanussatria.com, https://www.stevanussatria.com",
+            value: "https://www.stevanussatria.com",
           },
           {
             key: "Access-Control-Allow-Methods",
