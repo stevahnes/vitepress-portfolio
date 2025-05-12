@@ -1,1 +1,1 @@
-export * from './cursor.class';
+export * from "./cursor.class";

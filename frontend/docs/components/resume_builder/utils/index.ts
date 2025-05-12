@@ -1,1 +1,1 @@
-export * from './jspdf-wrapper.utils';
+export * from "./jspdf-wrapper.utils";
