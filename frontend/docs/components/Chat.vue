@@ -116,16 +116,20 @@ const sendMessage = async () => {
 
   try {
     const threadId = isClient.value ? localStorage.getItem('threadId') : null;
+    // Build request body, only include threadId if it exists
+    const requestBody: any = {
+      stream: true,
+      rawResponse: true,
+      messages: [{ role: 'user', content: userInput.value }]
+    };
+    if (threadId) {
+      requestBody.threadId = threadId;
+    }
 
     const response = await fetch('https://advocado-agent.vercel.app/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        stream: true,
-        rawResponse: true,
-        threadId,
-        messages: [{ role: 'user', content: userInput.value }]
-      })
+      body: JSON.stringify(requestBody)
     });
 
     if (!response.body) throw new Error('No response body');
