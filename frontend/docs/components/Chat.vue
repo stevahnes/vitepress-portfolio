@@ -3,39 +3,33 @@ import { ref, nextTick, onMounted, watch, computed } from 'vue';
 import { marked } from 'marked';
 import { useData } from 'vitepress';
 
-// Interfaces
+// --- Types ---
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp?: number;
 }
 
-// State management
-// TODO: WIP - Thread functionality is currently disabled as the get thread route is returning 404
-// The following features are temporarily disabled:
-// - End Chat button and functionality
-// - Thread resolution
+// --- State ---
 const userInput = ref('');
-const messages = ref<Message[]>([]);  // Start with empty messages
+const messages = ref<Message[]>([]);
 const loading = ref(false);
 const isInitialLoading = ref(false);
 const isDragging = ref(false);
-const startY = ref(0);
-const startHeight = ref(0);
 const chatHeight = ref(400);
 const clientSideTheme = ref(false);
-const isClient = ref(false);  // Add client-side detection
-const isEndingChat = ref(false);  // Add this line for end chat state
-const showFeedbackModal = ref(false);  // Add this for feedback modal
-const feedback = ref<'good' | 'bad' | null>(null);  // Add this for feedback state
+const isClient = ref(false);
+const isEndingChat = ref(false);
+const showFeedbackModal = ref(false);
+const feedback = ref<'good' | 'bad' | null>(null);
 const threadId = ref<string | null>(null);
 
-// DOM refs
+// --- DOM Refs ---
 const inputRef = ref<HTMLInputElement | null>(null);
 const chatContainerRef = ref<HTMLDivElement | null>(null);
 const chatWindowRef = ref<HTMLDivElement | null>(null);
 
-// Theme handling
+// --- Theme ---
 const { isDark } = useData();
 const cssVars = computed(() => ({
   '--scrollbar-thumb': clientSideTheme.value && isDark.value ? '#4a5568' : '#cbd5e0',
@@ -46,29 +40,26 @@ const cssVars = computed(() => ({
   '--blockquote-border-color': clientSideTheme.value && isDark.value ? '#4a5568' : '#cbd5e0',
 }));
 
-// Utility functions
-const formatTime = (timestamp) => new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-const parseMarkdown = (content) => marked.parse(content);
+// --- Computed ---
+const hasOngoingThread = computed(() => !!threadId.value);
+
+// --- Utility Functions ---
+const formatTime = (timestamp: number) => new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const parseMarkdown = (content: string) => marked.parse(content);
 
 const scrollToBottom = async () => {
   await nextTick();
-  if (chatContainerRef.value) {
-    chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
-  }
+  chatContainerRef.value && (chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight);
 };
 
-// Resize functionality - now supporting both mouse and touch events
-const startResize = (e) => {
+// --- Chat Window Resize ---
+const startResize = (e: MouseEvent | TouchEvent) => {
   e.preventDefault();
   isDragging.value = true;
-
-  // Handle both mouse and touch events
-  const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-  startY.value = clientY;
-  startHeight.value = chatHeight.value;
-
-  // Add appropriate event listeners based on event type
-  if (e.type.includes('touch')) {
+  const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+  (startResize as any).startY = clientY;
+  (startResize as any).startHeight = chatHeight.value;
+  if ('touches' in e) {
     document.addEventListener('touchmove', handleTouchResize, { passive: false });
     document.addEventListener('touchend', stopResize);
   } else {
@@ -76,101 +67,72 @@ const startResize = (e) => {
     document.addEventListener('mouseup', stopResize);
   }
 };
-
-const handleMouseResize = (e) => {
+const handleMouseResize = (e: MouseEvent) => {
   if (!isDragging.value) return;
-  const deltaY = e.clientY - startY.value;
-  chatHeight.value = Math.max(200, startHeight.value + deltaY);
+  const deltaY = e.clientY - (startResize as any).startY;
+  chatHeight.value = Math.max(200, (startResize as any).startHeight + deltaY);
 };
-
-const handleTouchResize = (e) => {
+const handleTouchResize = (e: TouchEvent) => {
   if (!isDragging.value) return;
-  e.preventDefault(); // Prevent scrolling while resizing
-  const deltaY = e.touches[0].clientY - startY.value;
-  chatHeight.value = Math.max(200, startHeight.value + deltaY);
+  e.preventDefault();
+  const deltaY = e.touches[0].clientY - (startResize as any).startY;
+  chatHeight.value = Math.max(200, (startResize as any).startHeight + deltaY);
 };
-
 const stopResize = () => {
   isDragging.value = false;
   document.removeEventListener('mousemove', handleMouseResize);
   document.removeEventListener('mouseup', stopResize);
   document.removeEventListener('touchmove', handleTouchResize);
   document.removeEventListener('touchend', stopResize);
-
   if (typeof localStorage !== 'undefined') {
     localStorage.setItem('chatHeight', chatHeight.value.toString());
   }
 };
 
-// Message handling
+// --- Message Handling ---
 const sendMessage = async () => {
   if (!userInput.value.trim()) return;
-
-  // Add user message
-  const userMessage: Message = {
-    role: 'user',
-    content: userInput.value,
-    timestamp: Date.now()
-  };
-  messages.value.push(userMessage);
-
+  messages.value.push({ role: 'user', content: userInput.value, timestamp: Date.now() });
   let currentAssistantContent = '';
   let assistantMessageAdded = false;
   loading.value = true;
-
   try {
     const requestBody: any = {
       stream: true,
       rawResponse: true,
       messages: [{ role: 'user', content: userInput.value }]
     };
-    if (threadId.value) {
-      requestBody.threadId = threadId.value;
-    }
-
+    if (threadId.value) requestBody.threadId = threadId.value;
     const response = await fetch('https://advocado-agent.vercel.app/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
-
     if (!response.body) throw new Error('No response body');
-
     const threadIdHeader = response.headers.get('lb-thread-id');
     if (threadIdHeader && isClient.value) {
       localStorage.setItem('threadId', threadIdHeader);
       threadId.value = threadIdHeader;
     }
-
-    // Process streaming response
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
-
       for (const line of lines) {
         if (!line.trim()) continue;
         try {
           const parsed = JSON.parse(line);
           const delta = parsed.choices[0]?.delta;
-
           if (delta?.content) {
             if (!assistantMessageAdded) {
-              messages.value.push({
-                role: 'assistant',
-                content: '',
-                timestamp: Date.now()
-              });
+              messages.value.push({ role: 'assistant', content: '', timestamp: Date.now() });
               assistantMessageAdded = true;
             }
-
             currentAssistantContent += delta.content;
             messages.value[messages.value.length - 1].content = currentAssistantContent;
             messages.value = [...messages.value];
@@ -183,110 +145,81 @@ const sendMessage = async () => {
     }
   } catch (error) {
     console.error('Error during streaming:', error);
-
     if (!assistantMessageAdded) {
-      messages.value.push({
-        role: 'assistant',
-        content: '[Error receiving response]',
-        timestamp: Date.now()
-      });
+      messages.value.push({ role: 'assistant', content: '[Error receiving response]', timestamp: Date.now() });
     } else if (currentAssistantContent.trim() === '') {
       messages.value[messages.value.length - 1].content = '[Error receiving response]';
     }
   } finally {
     loading.value = false;
     userInput.value = '';
-    if (inputRef.value) inputRef.value.focus();
+    inputRef.value?.focus();
     await scrollToBottom();
   }
 };
 
-// Add endChat function
-const endChat = async () => {
-  if (isEndingChat.value) return;
-
+// --- End Chat & Feedback Modal ---
+const endChat = () => {
+  if (isEndingChat.value || showFeedbackModal.value) return;
   if (!threadId.value) return;
-
-  // Show feedback modal first
   showFeedbackModal.value = true;
+  feedback.value = null;
 };
-
-// Add submitFeedback function
 const submitFeedback = async () => {
-  if (!feedback.value) return;
-
+  if (!feedback.value || isEndingChat.value) return;
   isEndingChat.value = true;
   try {
     if (!threadId.value) return;
-
     const response = await fetch('https://advocado-agent.vercel.app/thread/resolve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        threadId: threadId.value as string,
-        feedback: feedback.value
-      })
+      body: JSON.stringify({ threadId: threadId.value, feedback: feedback.value })
     });
-
     if (!response.ok) throw new Error('Failed to end chat');
-
-    // Clear the thread ID from localStorage
     localStorage.removeItem('threadId');
     threadId.value = null;
-
-    // Add a system message indicating chat has ended
-    const endMessage: Message = {
+    messages.value.push({
       role: 'assistant',
       content: 'Chat session has ended. Ask me anything to start a new conversation!',
       timestamp: Date.now()
-    };
-    messages.value.push(endMessage);
+    });
   } catch (error) {
     console.error('Error ending chat:', error);
-    const errorMessage: Message = {
+    messages.value.push({
       role: 'assistant',
       content: 'Failed to end chat session. Please try again.',
       timestamp: Date.now()
-    };
-    messages.value.push(errorMessage);
+    });
   } finally {
     isEndingChat.value = false;
     showFeedbackModal.value = false;
     feedback.value = null;
   }
 };
-
-// Add closeFeedbackModal function
 const closeFeedbackModal = () => {
   showFeedbackModal.value = false;
   feedback.value = null;
 };
 
-// Lifecycle hooks
+// --- Initial Load ---
 onMounted(async () => {
-  isClient.value = true;  // Mark as client-side
+  isClient.value = true;
   clientSideTheme.value = true;
   threadId.value = typeof localStorage !== 'undefined' ? localStorage.getItem('threadId') : null;
-
-  // Initialize with welcome message if no messages exist
   if (messages.value.length === 0) {
     messages.value = [
       { role: 'assistant', content: 'Hi! What would you like to learn about Steve today?', timestamp: Date.now() }
     ];
   }
-
-  if (isClient.value) {  // Only access browser APIs on client
+  if (isClient.value) {
     const existingThreadId = localStorage.getItem('threadId');
     if (existingThreadId) {
       isInitialLoading.value = true;
       try {
-        // Fetch thread messages
         const messagesResponse = await fetch(`https://advocado-agent.vercel.app/thread/listMessages?threadId=${existingThreadId}`);
         const messagesData = await messagesResponse.json();
-
         if (messagesData && Array.isArray(messagesData)) {
-          // Convert the messages to our format and add timestamps
-          messages.value = messagesData.map(msg => ({
+          messages.value = messagesData.map((msg: any) => ({
             role: msg.role,
             content: msg.content,
             timestamp: msg.created_at || Date.now()
@@ -294,7 +227,6 @@ onMounted(async () => {
         }
       } catch (error) {
         console.error('Error fetching thread messages:', error);
-        // If there's an error, start with the default message
         messages.value = [
           { role: 'assistant', content: 'Hi! What would you like to learn about Steve today?', timestamp: Date.now() }
         ];
@@ -302,22 +234,18 @@ onMounted(async () => {
         isInitialLoading.value = false;
       }
     }
-
     if (chatWindowRef.value) {
       const savedHeight = localStorage.getItem('chatHeight');
       if (savedHeight) chatHeight.value = parseInt(savedHeight);
     }
   }
-
   scrollToBottom();
-  if (inputRef.value) inputRef.value.focus();
+  inputRef.value?.focus();
 });
 
-// Watchers
+// --- Watchers ---
 watch(messages, () => scrollToBottom(), { deep: true });
 watch(isDark, () => { }, { immediate: true });
-
-const hasOngoingThread = computed(() => !!threadId.value);
 </script>
 
 <template>
