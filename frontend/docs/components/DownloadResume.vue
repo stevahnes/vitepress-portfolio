@@ -21,10 +21,6 @@ const props = defineProps({
         type: String,
         default: 'Download Resume'
     },
-    buttonClass: {
-        type: String,
-        default: 'download-button'
-    },
     openInNewTab: {
         type: Boolean,
         default: false
@@ -32,15 +28,9 @@ const props = defineProps({
 })
 
 // Use client-side only rendering to prevent hydration mismatch
-const mounted = ref(false)
+const isClient = ref(false)
 onMounted(() => {
-    mounted.value = true
-})
-
-// Compute button class based on theme
-const themeClass = computed(() => {
-    if (!mounted.value) return '' // Prevent hydration mismatch
-    return isDark.value ? 'dark-mode' : 'light-mode'
+    isClient.value = true
 })
 
 // Store the markdown content
@@ -48,6 +38,8 @@ const resumeMarkdown = ref<string>('')
 
 // Extract the markdown content from the VitePress page
 onMounted(() => {
+    if (!isClient.value) return
+
     // Get the content div that VitePress generates for the markdown page
     const contentElement = document.querySelector('.vp-doc')
 
@@ -136,6 +128,7 @@ function getMarkdownFromHTML(element: HTMLElement): string {
 
 // Generate and download the PDF
 function downloadResume() {
+    if (!isClient.value) return
     if (!resumeMarkdown.value) {
         console.error('Resume markdown content not found')
         return
@@ -159,31 +152,28 @@ function downloadResume() {
         generateOnePageStandardPDF(resume, doc, cursor)
 
         if (props.openInNewTab) {
-            // Use a direct data URL approach for better browser compatibility
-            const pdfBase64 = doc.output('dataurlstring');
+            // Generate PDF blob instead of data URL
+            const pdfBlob = doc.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
 
-            // First cleanup the title for safe use in filename
-            const safeFilename = props.filename.replace(/\.pdf$/, '');
+            // Create a temporary link element
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
 
-            // Open the PDF directly in a new tab
-            const newTab = window.open(pdfBase64, '_blank');
+            // Set the filename
+            link.download = props.filename;
 
-            // If the new tab was blocked, fall back to download
-            if (!newTab) {
-                console.error('Failed to open new tab. Pop-up blocker might be enabled.');
-                doc.save(props.filename);
-            } else {
-                // Set the tab title programmatically
-                setTimeout(() => {
-                    try {
-                        if (newTab.document) {
-                            newTab.document.title = safeFilename;
-                        }
-                    } catch (e) {
-                        console.warn('Could not set PDF tab title due to cross-origin restrictions');
-                    }
-                }, 100);
-            }
+            // Append to body, click, and remove
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Clean up the URL object after a delay
+            setTimeout(() => {
+                URL.revokeObjectURL(pdfUrl);
+            }, 100);
         } else {
             // Save the PDF with the provided filename
             doc.save(props.filename);
@@ -195,60 +185,20 @@ function downloadResume() {
 </script>
 
 <template>
-    <button :class="[buttonClass, mounted ? themeClass : '']" @click="downloadResume">
+    <button v-if="isClient" @click="downloadResume" :class="[
+        '!border-none !py-2.5 !px-6 !text-center !no-underline !inline-block !text-base !m-1 !cursor-pointer !rounded-full !font-medium !transition-all !duration-300 !shadow-sm',
+        '!font-sans !tracking-wide',
+        isDark ? '!bg-[#0059aa] hover:!bg-[#004c91]' : '!bg-[#3e94e8] hover:!bg-[#2a7fd1]',
+        '!text-white'
+    ]">
+        {{ buttonText || 'Download Resume' }}
+    </button>
+    <button v-else
+        class="!border-none !py-2.5 !px-6 !text-center !no-underline !inline-block !text-base !m-1 !cursor-pointer !rounded-full !font-medium !transition-all !duration-300 !shadow-sm !font-sans !tracking-wide !bg-[#0059aa] !text-white">
         {{ buttonText || 'Download Resume' }}
     </button>
 </template>
 
 <style scoped>
-.download-button {
-    border: none;
-    padding: 10px 26px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border-radius: 20px;
-    font-weight: 500;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-}
-
-/* Light mode (default) - matches the provided screenshot */
-.light-mode {
-    background-color: #3e94e8;
-    color: white;
-}
-
-.light-mode:hover {
-    background-color: #2a7fd1;
-}
-
-/* Dark mode */
-.dark-mode {
-    background-color: #0059aa;
-    color: white;
-}
-
-.dark-mode:hover {
-    background-color: #004c91;
-}
-
-/* Initial state before hydration - similar to dark mode to prevent flash */
-.download-button:not(.light-mode):not(.dark-mode) {
-    background-color: #0059aa;
-    color: white;
-}
-
-@media (prefers-color-scheme: dark) {
-
-    /* For SSR rendering before hydration */
-    .download-button:not(.light-mode):not(.dark-mode) {
-        background-color: #3e94e8;
-        color: white;
-    }
-}
+/* No additional styles needed as we're using Tailwind with !important flags */
 </style>
