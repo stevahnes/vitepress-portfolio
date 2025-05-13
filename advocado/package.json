@@ -8,7 +8,7 @@
   "scripts": {
     "test": "npx tsx test.ts",
     "update-pipe": "npx tsx update-advocado-pipe.ts",
-    "upload-memory": "npx tsx update-advocado-memory.ts"
+    "update-memory": "npx tsx update-advocado-memory.ts"
   },
   "dependencies": {
     "dotenv": "^16.5.0",

@@ -16,7 +16,6 @@ const docNames = [
   "milestones.md",
   "projects.md",
   "recommendations.md",
-  "index.md",
   "resume.md",
 ];
 
