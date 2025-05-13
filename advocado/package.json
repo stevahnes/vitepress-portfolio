@@ -7,8 +7,8 @@
   "type": "commonjs",
   "scripts": {
     "test": "npx tsx test.ts",
-    "update-pipe": "npx tsx update_advocado_pipe.ts",
-    "upload-memory": "npx tsx upload_advocado_memory.ts"
+    "update-pipe": "npx tsx update-advocado-pipe.ts",
+    "upload-memory": "npx tsx update-advocado-memory.ts"
   },
   "dependencies": {
     "dotenv": "^16.5.0",
