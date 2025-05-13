@@ -12,7 +12,7 @@ hero:
       text: Explore Projects
       link: /projects
     - theme: alt
-      text: Let's Chat!
+      text: Let's Chat
       link: https://calendly.com/stevanus-satria/30min
 
 features:
