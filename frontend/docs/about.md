@@ -12,8 +12,8 @@ hero:
       text: Explore Projects
       link: /projects
     - theme: alt
-      text: Book a Coaching Session
-      link: https://adplist.org/mentors/stevanus-satria
+      text: Let's Chat!
+      link: https://calendly.com/stevanus-satria/30min
 
 features:
   - title: ⌛ 7+
