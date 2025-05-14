@@ -6,7 +6,7 @@ features:
       src: /advocado.webp
     title: Advocado
     details: My biggest advocate, made possible by Langbase and Vercel
-    link: https://github.com/stevahnes/vitepress-portfolio/tree/main/langbase
+    link: https://github.com/stevahnes/vitepress-portfolio/tree/main/advocado
     target: _blank
   - icon:
       src: /vitepress.webp
@@ -86,3 +86,4 @@ features:
     link: https://youtu.be/xLcHc-iailM
     target: _blank
 ---
+
