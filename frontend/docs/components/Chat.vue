@@ -28,9 +28,36 @@ const showLeftScroll = ref(false);
 const showRightScroll = ref(false);
 
 // --- DOM Refs ---
-const inputRef = ref<HTMLInputElement | null>(null);
+const inputRef = ref<HTMLTextAreaElement | null>(null);
 const chatContainerRef = ref<HTMLDivElement | null>(null);
 const chatWindowRef = ref<HTMLDivElement | null>(null);
+
+// --- Message Input Handling ---
+const handleKeyDown = (e: KeyboardEvent) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (userInput.value.trim()) {
+      sendMessage();
+    }
+  }
+};
+
+// Auto-resize textarea as content grows
+const resizeTextarea = () => {
+  if (!inputRef.value) return;
+
+  // Reset height to auto first to get the correct scrollHeight
+  inputRef.value.style.height = 'auto';
+
+  // Set new height based on scrollHeight (with a max height)
+  const newHeight = Math.min(inputRef.value.scrollHeight, 200);
+  inputRef.value.style.height = `${newHeight}px`;
+};
+
+// Watch for input changes to auto-resize
+watch(userInput, () => {
+  nextTick(resizeTextarea);
+});
 
 // --- Theme ---
 const { isDark } = useData();
@@ -201,6 +228,10 @@ const sendMessage = async () => {
   } finally {
     loading.value = false;
     userInput.value = "";
+    // Reset textarea height
+    if (inputRef.value) {
+      inputRef.value.style.height = 'auto';
+    }
     inputRef.value?.focus();
     await scrollToBottom();
   }
@@ -327,6 +358,11 @@ onMounted(async () => {
     updatePromptScrollButtons();
     promptBarRef.value?.addEventListener("scroll", updatePromptScrollButtons);
     window.addEventListener("resize", updatePromptScrollButtons);
+    // Initialize textarea resize
+    if (inputRef.value) {
+      resizeTextarea();
+      inputRef.value.addEventListener('input', resizeTextarea);
+    }
   });
 });
 
@@ -481,12 +517,14 @@ watch(isDark, () => { }, { immediate: true });
         ? '!bg-gray-800 !border !border-gray-700'
         : '!bg-gray-100 !border !border-gray-200',
     ]">
-      <input ref="inputRef" v-model="userInput" type="text" placeholder="Ask something about Steve..." :class="[
-        '!flex-1 !border-0 !p-3 !outline-none !focus:ring-0 !focus:ring-offset-0',
-        clientSideTheme && isDark
-          ? '!bg-gray-800 !text-gray-100 !placeholder-gray-500'
-          : '!bg-gray-100 !text-gray-800 !placeholder-gray-400',
-      ]" :disabled="loading" />
+      <textarea ref="inputRef" v-model="userInput" @keydown="handleKeyDown" placeholder="Ask something about Steve..."
+        :class="[
+          '!flex-1 !border-0 !p-3 !outline-none !focus:ring-0 !focus:ring-offset-0 !resize-none',
+          '!min-h-[42px] !max-h-[200px] !overflow-y-auto',
+          clientSideTheme && isDark
+            ? '!bg-gray-800 !text-gray-100 !placeholder-gray-500'
+            : '!bg-gray-100 !text-gray-800 !placeholder-gray-400',
+        ]" :disabled="loading" rows="1"></textarea>
       <button type="submit"
         class="!bg-indigo-600 !hover:bg-indigo-700 !text-white !px-4 !transition-colors !duration-200 !ease-in-out !flex !items-center !justify-center !min-w-[60px]"
         :disabled="loading">
