@@ -262,6 +262,7 @@ const promptSuggestions = [
   "What are Steve's top skills?",
   "Summarize Steve's work experience",
   "Show me Steve's recent projects",
+  "How can I contact Steve?",
 ];
 
 function setSuggestion(suggestion: string) {
