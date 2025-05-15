@@ -276,6 +276,62 @@ export default defineConfig({
           ],
         },
       ],
+      "/resume": [
+        {
+          text: "Resume",
+          link: "/resume",
+          items: [
+            {
+              text: "Personal Profile",
+              link: "/resume#personal-profile",
+            },
+            {
+              text: "Core Competencies",
+              link: "/resume#core-competencies",
+            },
+            {
+              text: "Work Experience",
+              link: "/resume#work-experience",
+              items: [
+                {
+                  text: "Workato",
+                  link: "/resume#workato",
+                },
+                {
+                  text: "Shopee",
+                  link: "/resume#shopee",
+                },
+                {
+                  text: "Amadeus IT Group",
+                  link: "/resume#amadeus-it-group",
+                },
+                {
+                  text: "Works Applications Co., Ltd.",
+                  link: "/resume#works-applications-co-ltd",
+                },
+              ],
+            },
+            {
+              text: "Education",
+              link: "/resume#education",
+              items: [
+                {
+                  text: "Kellogg School of Management",
+                  link: "/resume#kellogg-school-of-management-northwestern-university",
+                },
+                {
+                  text: "SUTD",
+                  link: "/resume#singapore-university-of-technology-and-design",
+                },
+              ],
+            },
+            {
+              text: "Awards and Certifications",
+              link: "/resume#awards-and-certifications",
+            },
+          ],
+        },
+      ],
     },
 
     socialLinks: [
@@ -298,3 +354,4 @@ export default defineConfig({
     plugins: [tailwindcss(), ViteImageOptimizer()] as any,
   },
 });
+
