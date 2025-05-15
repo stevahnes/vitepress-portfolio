@@ -30,6 +30,8 @@ features:
     title: VitePress
   - icon: { src: ./langbase.png }
     title: Langbase
+  - icon: { dark: "./resend-dark.png", light: "./resend-light.svg" }
+    title: Resend
   - icon: { src: ./wordpress.svg }
     title: WordPress
   - icon: { dark: "./github-dark.png", light: "./github-light.png" }
@@ -51,3 +53,4 @@ features:
   - icon: { src: ./cove-ai.png }
     title: Cove AI
 ---
+
