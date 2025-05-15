@@ -36,6 +36,8 @@ features:
     title: WordPress
   - icon: { dark: "./github-dark.png", light: "./github-light.png" }
     title: Github
+  - icon: { src: ./github-copilot.png }
+    title: Github Copilot
   - icon: { src: ./vscode.png }
     title: Visual Studio Code
   - icon: { src: ./snowflake.png }
@@ -50,6 +52,8 @@ features:
     title: Miro
   - icon: { src: ./chatgpt.png }
     title: ChatGPT
+  - icon: { src: ./claude.png }
+    title: Claude
   - icon: { src: ./cove-ai.png }
     title: Cove AI
 ---
