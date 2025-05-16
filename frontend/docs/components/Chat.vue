@@ -2,17 +2,18 @@
 import { ref, nextTick, onMounted, watch, computed } from "vue";
 import { marked } from "marked";
 import { useData } from "vitepress";
+import { Message, Role } from "langbase";
 
 // --- Types ---
-interface Message {
-  role: "user" | "assistant";
+interface ChatMessage {
+  role: Role;
   content: string;
   timestamp?: number;
 }
 
 // --- State ---
 const userInput = ref("");
-const messages = ref<Message[]>([]);
+const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const isInitialLoading = ref(false);
 const isDragging = ref(false);
@@ -62,62 +63,61 @@ watch(userInput, () => {
 // --- Theme ---
 const { isDark } = useData();
 const cssVars = computed(() => ({
-  "--scrollbar-thumb":
-    clientSideTheme.value && isDark.value ? "#4a5568" : "#cbd5e0",
-  "--scrollbar-thumb-hover":
-    clientSideTheme.value && isDark.value ? "#2d3748" : "#a0aec0",
-  "--scrollbar-track":
-    clientSideTheme.value && isDark.value ? "#1a202c" : "#edf2f7",
+  "--scrollbar-thumb": clientSideTheme.value && isDark.value ? "#4a5568" : "#cbd5e0",
+  "--scrollbar-thumb-hover": clientSideTheme.value && isDark.value ? "#2d3748" : "#a0aec0",
+  "--scrollbar-track": clientSideTheme.value && isDark.value ? "#1a202c" : "#edf2f7",
   "--code-bg-color":
-    clientSideTheme.value && isDark.value
-      ? "rgba(0, 0, 0, 0.2)"
-      : "rgba(0, 0, 0, 0.05)",
+    clientSideTheme.value && isDark.value ? "rgba(0, 0, 0, 0.2)" : "rgba(0, 0, 0, 0.05)",
   "--link-color": clientSideTheme.value && isDark.value ? "#90cdf4" : "#3182ce",
-  "--blockquote-border-color":
-    clientSideTheme.value && isDark.value ? "#4a5568" : "#cbd5e0",
+  "--blockquote-border-color": clientSideTheme.value && isDark.value ? "#4a5568" : "#cbd5e0",
 }));
 
 // --- Computed ---
 const hasOngoingThread = computed(() => !!threadId.value);
 
 // --- Utility Functions ---
-const formatTime = (timestamp: number) =>
+const formatTime = (timestamp: number): string =>
   new Date(timestamp).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
-const parseMarkdown = (content: string) => marked.parse(content);
 
-const scrollToBottom = async () => {
+const parseMarkdown = (content: string): string | Promise<string> => marked.parse(content);
+
+const scrollToBottom = async (): Promise<void> => {
   await nextTick();
-  chatContainerRef.value &&
-    (chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight);
+  if (chatContainerRef.value) {
+    chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
+  }
 };
 
-const updatePromptScrollButtons = () => {
+const updatePromptScrollButtons = (): void => {
   const el = promptBarRef.value;
   if (!el) return;
   showLeftScroll.value = el.scrollLeft > 0;
   showRightScroll.value = el.scrollLeft + el.clientWidth < el.scrollWidth - 1;
 };
 
-const scrollPromptBar = (direction: "left" | "right") => {
-  const el = promptBarRef.value;
-  if (!el) return;
-  const scrollAmount = 120;
-  el.scrollBy({
-    left: direction === "left" ? -scrollAmount : scrollAmount,
-    behavior: "smooth",
-  });
-};
-
 // --- Chat Window Resize ---
-const startResize = (e: MouseEvent | TouchEvent) => {
+interface ResizeState {
+  startY: number;
+  startHeight: number;
+}
+
+const resizeState = ref<ResizeState>({
+  startY: 0,
+  startHeight: 0,
+});
+
+const startResize = (e: MouseEvent | TouchEvent): void => {
   e.preventDefault();
   isDragging.value = true;
   const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
-  (startResize as any).startY = clientY;
-  (startResize as any).startHeight = chatHeight.value;
+  resizeState.value = {
+    startY: clientY,
+    startHeight: chatHeight.value,
+  };
+
   if ("touches" in e) {
     document.addEventListener("touchmove", handleTouchResize, {
       passive: false,
@@ -128,18 +128,21 @@ const startResize = (e: MouseEvent | TouchEvent) => {
     document.addEventListener("mouseup", stopResize);
   }
 };
-const handleMouseResize = (e: MouseEvent) => {
+
+const handleMouseResize = (e: MouseEvent): void => {
   if (!isDragging.value) return;
-  const deltaY = e.clientY - (startResize as any).startY;
-  chatHeight.value = Math.max(200, (startResize as any).startHeight + deltaY);
+  const deltaY = e.clientY - resizeState.value.startY;
+  chatHeight.value = Math.max(200, resizeState.value.startHeight + deltaY);
 };
-const handleTouchResize = (e: TouchEvent) => {
+
+const handleTouchResize = (e: TouchEvent): void => {
   if (!isDragging.value) return;
   e.preventDefault();
-  const deltaY = e.touches[0].clientY - (startResize as any).startY;
-  chatHeight.value = Math.max(200, (startResize as any).startHeight + deltaY);
+  const deltaY = e.touches[0].clientY - resizeState.value.startY;
+  chatHeight.value = Math.max(200, resizeState.value.startHeight + deltaY);
 };
-const stopResize = () => {
+
+const stopResize = (): void => {
   isDragging.value = false;
   document.removeEventListener("mousemove", handleMouseResize);
   document.removeEventListener("mouseup", stopResize);
@@ -151,7 +154,7 @@ const stopResize = () => {
 };
 
 // --- Message Handling ---
-const sendMessage = async () => {
+const sendMessage = async (): Promise<void> => {
   if (!userInput.value.trim()) return;
   messages.value.push({
     role: "user",
@@ -162,32 +165,45 @@ const sendMessage = async () => {
   let assistantMessageAdded = false;
   loading.value = true;
   try {
-    const requestBody: any = {
+    const requestBody: {
+      stream: boolean;
+      rawResponse: boolean;
+      messages: { role: string; content: string }[];
+      threadId?: string;
+    } = {
       stream: true,
       rawResponse: true,
       messages: [{ role: "user", content: userInput.value }],
     };
+
     if (threadId.value) requestBody.threadId = threadId.value;
+
     const response = await fetch("https://advocado-agent.vercel.app/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestBody),
     });
+
     if (!response.body) throw new Error("No response body");
+
     const threadIdHeader = response.headers.get("lb-thread-id");
     if (threadIdHeader && isClient.value) {
       localStorage.setItem("threadId", threadIdHeader);
       threadId.value = threadIdHeader;
     }
+
     const reader = response.body.getReader();
     const decoder = new TextDecoder("utf-8");
     let buffer = "";
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split("\n");
       buffer = lines.pop() || "";
+
       for (const line of lines) {
         if (!line.trim()) continue;
         try {
@@ -203,8 +219,7 @@ const sendMessage = async () => {
               assistantMessageAdded = true;
             }
             currentAssistantContent += delta.content;
-            messages.value[messages.value.length - 1].content =
-              currentAssistantContent;
+            messages.value[messages.value.length - 1].content = currentAssistantContent;
             messages.value = [...messages.value];
             await scrollToBottom();
           }
@@ -222,8 +237,7 @@ const sendMessage = async () => {
         timestamp: Date.now(),
       });
     } else if (currentAssistantContent.trim() === "") {
-      messages.value[messages.value.length - 1].content =
-        "[Error receiving response]";
+      messages.value[messages.value.length - 1].content = "[Error receiving response]";
     }
   } finally {
     loading.value = false;
@@ -238,35 +252,32 @@ const sendMessage = async () => {
 };
 
 // --- End Chat & Feedback Modal ---
-const endChat = () => {
+const endChat = (): void => {
   if (isEndingChat.value || showFeedbackModal.value) return;
   if (!threadId.value) return;
   showFeedbackModal.value = true;
   feedback.value = null;
 };
-const submitFeedback = async () => {
+
+const submitFeedback = async (): Promise<void> => {
   if (!feedback.value || isEndingChat.value) return;
   isEndingChat.value = true;
   try {
     if (!threadId.value) return;
-    const response = await fetch(
-      "https://advocado-agent.vercel.app/thread/resolve",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          threadId: threadId.value,
-          feedback: feedback.value,
-        }),
-      },
-    );
+    const response = await fetch("https://advocado-agent.vercel.app/thread/resolve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        threadId: threadId.value,
+        feedback: feedback.value,
+      }),
+    });
     if (!response.ok) throw new Error("Failed to end chat");
     localStorage.removeItem("threadId");
     threadId.value = null;
     messages.value.push({
       role: "assistant",
-      content:
-        "Chat session has ended. Ask me anything to start a new conversation!",
+      content: "Chat session has ended. Ask me anything to start a new conversation!",
       timestamp: Date.now(),
     });
   } catch (error) {
@@ -282,7 +293,8 @@ const submitFeedback = async () => {
     feedback.value = null;
   }
 };
-const closeFeedbackModal = () => {
+
+const closeFeedbackModal = (): void => {
   showFeedbackModal.value = false;
   feedback.value = null;
 };
@@ -296,7 +308,7 @@ const promptSuggestions = [
   "How can I contact Steve?",
 ];
 
-function setSuggestion(suggestion: string) {
+function setSuggestion(suggestion: string): void {
   userInput.value = suggestion;
   inputRef.value?.focus();
 }
@@ -305,10 +317,7 @@ function setSuggestion(suggestion: string) {
 onMounted(async () => {
   isClient.value = true;
   clientSideTheme.value = true;
-  threadId.value =
-    typeof localStorage !== "undefined"
-      ? localStorage.getItem("threadId")
-      : null;
+  threadId.value = typeof localStorage !== "undefined" ? localStorage.getItem("threadId") : null;
   if (messages.value.length === 0) {
     messages.value = [
       {
@@ -328,10 +337,10 @@ onMounted(async () => {
         );
         const messagesData = await messagesResponse.json();
         if (messagesData && Array.isArray(messagesData)) {
-          messages.value = messagesData.map((msg: any) => ({
+          messages.value = messagesData.map((msg: Message) => ({
             role: msg.role,
-            content: msg.content,
-            timestamp: msg.created_at || Date.now(),
+            content: msg.content ? msg.content : "",
+            timestamp: Date.now(),
           }));
         }
       } catch (error) {
@@ -367,8 +376,15 @@ onMounted(async () => {
 });
 
 // --- Watchers ---
-watch(messages, () => scrollToBottom(), { deep: true });
-watch(isDark, () => {}, { immediate: true });
+watch(
+  messages,
+  () => {
+    scrollToBottom();
+  },
+  { deep: true },
+);
+
+// Remove empty watch on isDark
 </script>
 
 <template>
@@ -388,9 +404,7 @@ watch(isDark, () => {}, { immediate: true });
     <div
       :class="[
         '!mb-4 !pb-3 !flex !items-center !justify-between',
-        clientSideTheme && isDark
-          ? '!border-b !border-gray-700'
-          : '!border-b !border-gray-200',
+        clientSideTheme && isDark ? '!border-b !border-gray-700' : '!border-b !border-gray-200',
       ]"
     >
       <div class="!flex !items-center">
@@ -407,32 +421,25 @@ watch(isDark, () => {}, { immediate: true });
       </div>
       <button
         v-if="hasOngoingThread"
-        @click="endChat"
         :disabled="isEndingChat"
         :class="[
           '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
           '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
           isEndingChat && '!opacity-50 !cursor-not-allowed',
         ]"
+        @click="endChat"
       >
         {{ isEndingChat ? "Ending..." : "End Chat" }}
       </button>
     </div>
 
     <!-- Initial loading indicator -->
-    <div
-      v-if="isInitialLoading"
-      class="!flex-1 !flex !items-center !justify-center"
-    >
+    <div v-if="isInitialLoading" class="!flex-1 !flex !items-center !justify-center">
       <div class="!flex !flex-col !items-center !space-y-4">
         <div
           class="!h-8 !w-8 !border-4 !border-indigo-600 !border-t-transparent !rounded-full !animate-spin"
         ></div>
-        <p
-          :class="
-            clientSideTheme && isDark ? '!text-gray-300' : '!text-gray-600'
-          "
-        >
+        <p :class="clientSideTheme && isDark ? '!text-gray-300' : '!text-gray-600'">
           Loading conversation...
         </p>
       </div>
@@ -451,7 +458,7 @@ watch(isDark, () => {}, { immediate: true });
         :class="[msg.role === 'user' ? '!justify-end' : '!justify-start']"
       >
         <div
-          v-if="msg.content.trim().length > 0"
+          v-if="msg.content.trim()"
           :class="[
             '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
             msg.role === 'user'
@@ -486,10 +493,12 @@ watch(isDark, () => {}, { immediate: true });
               >{{ formatTime(msg.timestamp) }}</span
             >
           </div>
+          <!-- eslint-disable vue/no-v-html -->
           <div
             class="!whitespace-pre-wrap markdown-content"
             v-html="parseMarkdown(msg.content)"
           ></div>
+          <!-- eslint-enable -->
         </div>
       </div>
 
@@ -506,9 +515,7 @@ watch(isDark, () => {}, { immediate: true });
           <div class="!flex !justify-between !items-center !mb-1">
             <span
               :class="
-                clientSideTheme && isDark
-                  ? '!text-xs !text-gray-400'
-                  : '!text-xs !text-gray-500'
+                clientSideTheme && isDark ? '!text-xs !text-gray-400' : '!text-xs !text-gray-500'
               "
               >Advocado</span
             >
@@ -566,7 +573,6 @@ watch(isDark, () => {}, { immediate: true });
           v-for="(suggestion, idx) in promptSuggestions"
           :key="idx"
           type="button"
-          @click="setSuggestion(suggestion)"
           :class="[
             '!px-4 !py-2 !rounded-full !text-sm !font-medium !transition-colors !duration-200 !shadow',
             '!border !whitespace-nowrap',
@@ -574,6 +580,7 @@ watch(isDark, () => {}, { immediate: true });
               ? '!bg-gray-800 !text-gray-100 !border-gray-700 hover:!bg-gray-700'
               : '!bg-white !text-gray-800 !border-gray-200 hover:!bg-gray-100',
           ]"
+          @click="setSuggestion(suggestion)"
         >
           {{ suggestion }}
         </button>
@@ -582,18 +589,17 @@ watch(isDark, () => {}, { immediate: true });
 
     <!-- Input form -->
     <form
-      @submit.prevent="sendMessage"
       :class="[
         '!mt-4 !flex !rounded-lg !overflow-hidden !shadow-md',
         clientSideTheme && isDark
           ? '!bg-gray-800 !border !border-gray-700'
           : '!bg-gray-100 !border !border-gray-200',
       ]"
+      @submit.prevent="sendMessage"
     >
       <textarea
         ref="inputRef"
         v-model="userInput"
-        @keydown="handleKeyDown"
         placeholder="Ask something about Steve..."
         :class="[
           '!flex-1 !border-0 !p-3 !outline-none !focus:ring-0 !focus:ring-offset-0 !resize-none',
@@ -604,6 +610,7 @@ watch(isDark, () => {}, { immediate: true });
         ]"
         :disabled="loading"
         rows="1"
+        @keydown="handleKeyDown"
       ></textarea>
       <button
         type="submit"
@@ -640,17 +647,13 @@ watch(isDark, () => {}, { immediate: true });
       <div
         :class="[
           '!absolute !inset-0',
-          clientSideTheme && isDark
-            ? '!bg-black !bg-opacity-60'
-            : '!bg-white !bg-opacity-60',
+          clientSideTheme && isDark ? '!bg-black !bg-opacity-60' : '!bg-white !bg-opacity-60',
         ]"
       ></div>
       <div
         :class="[
           '!relative !rounded-lg !p-6 !w-96 !shadow-xl',
-          clientSideTheme && isDark
-            ? '!bg-gray-800 !text-white'
-            : '!bg-white !text-gray-800',
+          clientSideTheme && isDark ? '!bg-gray-800 !text-white' : '!bg-white !text-gray-800',
         ]"
       >
         <h3
@@ -663,7 +666,6 @@ watch(isDark, () => {}, { immediate: true });
         </h3>
         <div class="!flex !space-x-4 !mb-6">
           <button
-            @click="feedback = 'good'"
             :class="[
               '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
               feedback === 'good'
@@ -672,11 +674,11 @@ watch(isDark, () => {}, { immediate: true });
                   ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
                   : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
             ]"
+            @click="feedback = 'good'"
           >
             Good 👍
           </button>
           <button
-            @click="feedback = 'bad'"
             :class="[
               '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
               feedback === 'bad'
@@ -685,24 +687,24 @@ watch(isDark, () => {}, { immediate: true });
                   ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
                   : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
             ]"
+            @click="feedback = 'bad'"
           >
             Bad 👎
           </button>
         </div>
         <div class="!flex !justify-end !space-x-3">
           <button
-            @click="closeFeedbackModal"
             :class="[
               '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
               clientSideTheme && isDark
                 ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
                 : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
             ]"
+            @click="closeFeedbackModal"
           >
             Cancel
           </button>
           <button
-            @click="submitFeedback"
             :disabled="!feedback || isEndingChat"
             :class="[
               '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
@@ -710,6 +712,7 @@ watch(isDark, () => {}, { immediate: true });
                 ? '!bg-gray-400 !text-white !cursor-not-allowed'
                 : '!bg-indigo-600 !text-white !hover:bg-indigo-700',
             ]"
+            @click="submitFeedback"
           >
             {{ isEndingChat ? "Ending..." : "End Chat" }}
           </button>
@@ -722,9 +725,7 @@ watch(isDark, () => {}, { immediate: true });
     v-else
     class="!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative !border !border-gray-200 !bg-gray-50"
   >
-    <div
-      class="!mb-4 !pb-3 !flex !items-center !justify-between !border-b !border-gray-200"
-    >
+    <div class="!mb-4 !pb-3 !flex !items-center !justify-between !border-b !border-gray-200">
       <div class="!flex !items-center">
         <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
         <h3 class="!text-gray-800 !font-medium">Chat with Advocado 🥑</h3>
