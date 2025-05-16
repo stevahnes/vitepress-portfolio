@@ -22,13 +22,8 @@ export function constructEducationContent(
   pageParameters: FormatParameters,
 ): void {
   cursor.setSize(standard.TEXT_FONT_SIZE);
-  educations.forEach((education) => {
-    updateFontAndSize(
-      jsPDFInstance,
-      standard.FONT_NAME,
-      FontStyle.BOLD,
-      cursor.getSize(),
-    );
+  educations.forEach(education => {
+    updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.BOLD, cursor.getSize());
     cursor.setXCoordinate(standard.MARGIN);
     writeLeft(jsPDFInstance, toUpper(education.institution), cursor);
     cursor.setXCoordinate(pageParameters.PORTRAIT_WIDTH - standard.MARGIN);
@@ -36,33 +31,14 @@ export function constructEducationContent(
       education.end.length > 0 ? education.end : UNDEFINED_PERIOD_END,
     )}`;
     writeRight(jsPDFInstance, educationPeriodText, cursor);
-    enterAndCheckMargin(
-      jsPDFInstance,
-      cursor,
-      standard,
-      pageParameters,
-      DEFAULT_LINE_HEIGHT,
-      1,
-    );
+    enterAndCheckMargin(jsPDFInstance, cursor, standard, pageParameters, DEFAULT_LINE_HEIGHT, 1);
     cursor.setXCoordinate(standard.MARGIN);
     writeLeft(jsPDFInstance, education.qualification, cursor);
     if (education.honorsAndGrade) {
-      updateFontAndSize(
-        jsPDFInstance,
-        standard.FONT_NAME,
-        FontStyle.REGULAR,
-        cursor.getSize(),
-      );
+      updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.REGULAR, cursor.getSize());
       cursor.setXCoordinate(pageParameters.PORTRAIT_WIDTH - standard.MARGIN);
       writeRight(jsPDFInstance, education.honorsAndGrade, cursor);
     }
-    enterAndCheckMargin(
-      jsPDFInstance,
-      cursor,
-      standard,
-      pageParameters,
-      DEFAULT_LINE_HEIGHT,
-      1,
-    );
+    enterAndCheckMargin(jsPDFInstance, cursor, standard, pageParameters, DEFAULT_LINE_HEIGHT, 1);
   });
 }

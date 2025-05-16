@@ -29,59 +29,23 @@ export function generateOnePageStandardPDF(
   jsPDFInstance.addFont("Calibri-bold.ttf", "Calibri", "bold");
 
   /** Construct Page Header */
-  constructHeader(
-    resume.header,
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructHeader(resume.header, jsPDFInstance, cursor, OnePageStandard, A4Parameters);
 
   /** Line Space */
-  addLineSpace(
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-    DEFAULT_LINE_HEIGHT,
-  );
+  addLineSpace(jsPDFInstance, cursor, OnePageStandard, A4Parameters, DEFAULT_LINE_HEIGHT);
 
   /** Construct Personal Profile */
   // Section Header
-  constructSectionHeader(
-    "PERSONAL PROFILE",
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructSectionHeader("PERSONAL PROFILE", jsPDFInstance, cursor, OnePageStandard, A4Parameters);
   // Section Content
-  constructProfileContent(
-    resume.profile,
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructProfileContent(resume.profile, jsPDFInstance, cursor, OnePageStandard, A4Parameters);
 
   /** Line Space */
-  addLineSpace(
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-    DEFAULT_LINE_HEIGHT,
-  );
+  addLineSpace(jsPDFInstance, cursor, OnePageStandard, A4Parameters, DEFAULT_LINE_HEIGHT);
 
   /** Construct Core Competencies */
   // Section Header
-  constructSectionHeader(
-    "CORE COMPETENCIES",
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructSectionHeader("CORE COMPETENCIES", jsPDFInstance, cursor, OnePageStandard, A4Parameters);
   // Section Content
   constructCoreCompetenciesContent(
     resume.competencies,
@@ -92,67 +56,25 @@ export function generateOnePageStandardPDF(
   );
 
   /** Line Space */
-  addLineSpace(
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-    DEFAULT_LINE_HEIGHT,
-  );
+  addLineSpace(jsPDFInstance, cursor, OnePageStandard, A4Parameters, DEFAULT_LINE_HEIGHT);
 
   /** Construct Work Experience */
   // Section Header
-  constructSectionHeader(
-    "WORK EXPERIENCE",
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructSectionHeader("WORK EXPERIENCE", jsPDFInstance, cursor, OnePageStandard, A4Parameters);
   // Section Content
-  constructWorkExperienceContent(
-    resume.work,
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructWorkExperienceContent(resume.work, jsPDFInstance, cursor, OnePageStandard, A4Parameters);
 
   /** Line Space */
-  addLineSpace(
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-    DEFAULT_LINE_HEIGHT,
-  );
+  addLineSpace(jsPDFInstance, cursor, OnePageStandard, A4Parameters, DEFAULT_LINE_HEIGHT);
 
   /** Construct Education */
   // Section Header
-  constructSectionHeader(
-    "EDUCATION",
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructSectionHeader("EDUCATION", jsPDFInstance, cursor, OnePageStandard, A4Parameters);
   // Section Content
-  constructEducationContent(
-    resume.education,
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-  );
+  constructEducationContent(resume.education, jsPDFInstance, cursor, OnePageStandard, A4Parameters);
 
   /** Line Space */
-  addLineSpace(
-    jsPDFInstance,
-    cursor,
-    OnePageStandard,
-    A4Parameters,
-    DEFAULT_LINE_HEIGHT,
-  );
+  addLineSpace(jsPDFInstance, cursor, OnePageStandard, A4Parameters, DEFAULT_LINE_HEIGHT);
 
   /** Construct Awards & Certifications */
   // Section Header

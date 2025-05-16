@@ -1,9 +1,5 @@
 import jsPDF from "jspdf";
-import {
-  FormatParameters,
-  Standard,
-  AwardsAndCertification,
-} from "../../../../models";
+import { FormatParameters, Standard, AwardsAndCertification } from "../../../../models";
 import { Cursor } from "../../../../class";
 import {
   enterAndCheckMargin,
@@ -30,12 +26,7 @@ export function constructAwardsAndCertificationsContent(
 ): void {
   cursor.setSize(standard.TEXT_FONT_SIZE);
   awardsAndCertifications.forEach((awardOrCert, index) => {
-    updateFontAndSize(
-      jsPDFInstance,
-      standard.FONT_NAME,
-      FontStyle.REGULAR,
-      cursor.getSize(),
-    );
+    updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.REGULAR, cursor.getSize());
     cursor.setXCoordinate(standard.MARGIN);
     writeLeft(jsPDFInstance, BULLETS, cursor);
     cursor.setXCoordinate(standard.MARGIN + BULLETS_WIDTH);
@@ -48,12 +39,7 @@ export function constructAwardsAndCertificationsContent(
         AWARDS_AND_CERTS_DATE_WIDTH,
     );
     writeLeft(jsPDFInstance, awardOrCertTexts, cursor);
-    updateFontAndSize(
-      jsPDFInstance,
-      standard.FONT_NAME,
-      FontStyle.BOLD,
-      cursor.getSize(),
-    );
+    updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.BOLD, cursor.getSize());
     cursor.setXCoordinate(pageParameters.PORTRAIT_WIDTH - standard.MARGIN);
     writeRight(jsPDFInstance, awardOrCert.acquiredDate, cursor);
     if (index < awardsAndCertifications.length - 1) {

@@ -1,10 +1,5 @@
 import jsPDF from "jspdf";
-import {
-  Designation,
-  FormatParameters,
-  Standard,
-  Work,
-} from "../../../../models";
+import { Designation, FormatParameters, Standard, Work } from "../../../../models";
 import { Cursor } from "../../../../class";
 import {
   enterAndCheckMargin,
@@ -31,24 +26,12 @@ export function constructWorkExperienceContent(
 ): void {
   cursor.setSize(standard.TEXT_FONT_SIZE);
   works.forEach((work, index) => {
-    updateFontAndSize(
-      jsPDFInstance,
-      standard.FONT_NAME,
-      FontStyle.BOLD,
-      cursor.getSize(),
-    );
+    updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.BOLD, cursor.getSize());
     cursor.setXCoordinate(standard.MARGIN);
     writeLeft(jsPDFInstance, toUpper(work.company), cursor);
     cursor.setXCoordinate(pageParameters.PORTRAIT_WIDTH - standard.MARGIN);
     writeRight(jsPDFInstance, startCase(work.location), cursor);
-    enterAndCheckMargin(
-      jsPDFInstance,
-      cursor,
-      standard,
-      pageParameters,
-      DEFAULT_LINE_HEIGHT,
-      1,
-    );
+    enterAndCheckMargin(jsPDFInstance, cursor, standard, pageParameters, DEFAULT_LINE_HEIGHT, 1);
     constructWorkDesignationsAndPeriods(
       work.designations,
       jsPDFInstance,
@@ -56,28 +39,10 @@ export function constructWorkExperienceContent(
       standard,
       pageParameters,
     );
-    updateFontAndSize(
-      jsPDFInstance,
-      standard.FONT_NAME,
-      FontStyle.REGULAR,
-      cursor.getSize(),
-    );
-    constructWorkDescriptions(
-      work.descriptions,
-      jsPDFInstance,
-      cursor,
-      standard,
-      pageParameters,
-    );
+    updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.REGULAR, cursor.getSize());
+    constructWorkDescriptions(work.descriptions, jsPDFInstance, cursor, standard, pageParameters);
     if (index < works.length - 1) {
-      enterAndCheckMargin(
-        jsPDFInstance,
-        cursor,
-        standard,
-        pageParameters,
-        DEFAULT_LINE_HEIGHT,
-        1,
-      );
+      enterAndCheckMargin(jsPDFInstance, cursor, standard, pageParameters, DEFAULT_LINE_HEIGHT, 1);
     }
   });
 }
@@ -89,7 +54,7 @@ function constructWorkDesignationsAndPeriods(
   standard: Standard,
   pageParameters: FormatParameters,
 ): void {
-  designations.forEach((designation) => {
+  designations.forEach(designation => {
     cursor.setXCoordinate(standard.MARGIN);
     writeLeft(jsPDFInstance, designation.title, cursor);
     cursor.setXCoordinate(pageParameters.PORTRAIT_WIDTH - standard.MARGIN);
@@ -97,14 +62,7 @@ function constructWorkDesignationsAndPeriods(
       designation.end.length > 0 ? designation.end : UNDEFINED_PERIOD_END,
     )}`;
     writeRight(jsPDFInstance, designationPeriodText, cursor);
-    enterAndCheckMargin(
-      jsPDFInstance,
-      cursor,
-      standard,
-      pageParameters,
-      DEFAULT_LINE_HEIGHT,
-      1,
-    );
+    enterAndCheckMargin(jsPDFInstance, cursor, standard, pageParameters, DEFAULT_LINE_HEIGHT, 1);
   });
 }
 
@@ -115,7 +73,7 @@ function constructWorkDescriptions(
   standard: Standard,
   pageParameters: FormatParameters,
 ): void {
-  descriptions.forEach((description) => {
+  descriptions.forEach(description => {
     const descriptionTexts: string[] = splitTextToSize(
       jsPDFInstance,
       `${trimEnd(upperFirst(description), ".")}.`,
