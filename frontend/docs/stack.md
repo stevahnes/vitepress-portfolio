@@ -32,6 +32,9 @@ features:
   - icon: { src: ./cloudflare.webp }
     title: Cloudflare
     details: Security and speed with a touch of CDN charm.
+  - icon: { src: ./postman.webp }
+    title: Postman
+    details: Your API sidekick for smooth requests and quick responses.
   - icon: { src: ./netlify.svg }
     title: Netlify
     details: Deploy dreams with a drag, drop, and click.
@@ -84,4 +87,3 @@ features:
     title: Cove AI
     details: Bring context to your content and sanity to your stack.
 ---
-

@@ -354,4 +354,3 @@ export default defineConfig({
     plugins: [tailwindcss(), ViteImageOptimizer()] as any,
   },
 });
-
