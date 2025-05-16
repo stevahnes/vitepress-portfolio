@@ -19,17 +19,12 @@ export function constructCoreCompetenciesContent(
   pageParameters: FormatParameters,
 ): void {
   cursor.setSize(standard.TEXT_FONT_SIZE);
-  updateFontAndSize(
-    jsPDFInstance,
-    standard.FONT_NAME,
-    FontStyle.REGULAR,
-    cursor.getSize(),
-  );
+  updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.REGULAR, cursor.getSize());
   const competenciesTexts: string[] = splitTextToSize(
     jsPDFInstance,
     competencies.join(" • "),
     pageParameters.PORTRAIT_WIDTH - 2 * standard.MARGIN,
-  ).map((text) => trimStart(trimEnd(text, " •"), "• "));
+  ).map(text => trimStart(trimEnd(text, " •"), "• "));
   cursor.setXCoordinate(pageParameters.PORTRAIT_WIDTH / 2);
   writeCenter(jsPDFInstance, competenciesTexts, cursor);
   enterAndCheckMargin(

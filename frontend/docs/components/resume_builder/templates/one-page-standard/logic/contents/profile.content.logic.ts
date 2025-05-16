@@ -18,12 +18,7 @@ export function constructProfileContent(
   pageParameters: FormatParameters,
 ): void {
   cursor.setSize(standard.TEXT_FONT_SIZE);
-  updateFontAndSize(
-    jsPDFInstance,
-    standard.FONT_NAME,
-    FontStyle.REGULAR,
-    cursor.getSize(),
-  );
+  updateFontAndSize(jsPDFInstance, standard.FONT_NAME, FontStyle.REGULAR, cursor.getSize());
   const profileTexts: string[] = splitTextToSize(
     jsPDFInstance,
     profile,

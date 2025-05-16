@@ -269,9 +269,7 @@ export default defineConfig({
             {
               text: "SUTD",
               link: "/recommendations#sutd",
-              items: [
-                { text: "Harry Nguyen", link: "/recommendations#harry-nguyen" },
-              ],
+              items: [{ text: "Harry Nguyen", link: "/recommendations#harry-nguyen" }],
             },
           ],
         },

@@ -4,18 +4,28 @@
 **/.vitepress/cache
 **/.output
 
-# Ignore cache
+# Ignore cache and temporary files
 **/.vite
 **/.cache
+**/.temp
 
 # Ignore dependencies
-/node_modules
+node_modules
 
-# Ignore lock files
+# Package files
+package.json
 package-lock.json
-yarn.lock
 pnpm-lock.yaml
+yarn.lock
 
 # Ignore other common unnecessary files
 .DS_Store
-.env* 
+.env*
+
+# Tailwind CSS 4 cache
+.twcache
+
+# Other assets
+*.svg
+*.min.css
+*.min.js

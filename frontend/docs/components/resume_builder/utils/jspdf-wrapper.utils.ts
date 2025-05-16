@@ -9,39 +9,23 @@ export enum FontStyle {
   REGULAR = "normal",
 }
 
-export function splitTextToSize(
-  jsPDFInstance: jsPDF,
-  text: string,
-  maxWidth: number,
-): string[] {
+export function splitTextToSize(jsPDFInstance: jsPDF, text: string, maxWidth: number): string[] {
   return jsPDFInstance.splitTextToSize(text, maxWidth);
 }
 
-export function writeCenter(
-  jsPDFInstance: jsPDF,
-  text: string | string[],
-  cursor: Cursor,
-): void {
+export function writeCenter(jsPDFInstance: jsPDF, text: string | string[], cursor: Cursor): void {
   jsPDFInstance.text(text, cursor.getXCoordinate(), cursor.getYCoordinate(), {
     align: "center",
   });
 }
 
-export function writeLeft(
-  jsPDFInstance: jsPDF,
-  text: string | string[],
-  cursor: Cursor,
-): void {
+export function writeLeft(jsPDFInstance: jsPDF, text: string | string[], cursor: Cursor): void {
   jsPDFInstance.text(text, cursor.getXCoordinate(), cursor.getYCoordinate(), {
     align: "left",
   });
 }
 
-export function writeRight(
-  jsPDFInstance: jsPDF,
-  text: string | string[],
-  cursor: Cursor,
-): void {
+export function writeRight(jsPDFInstance: jsPDF, text: string | string[], cursor: Cursor): void {
   jsPDFInstance.text(text, cursor.getXCoordinate(), cursor.getYCoordinate(), {
     align: "right",
   });
@@ -90,9 +74,7 @@ export function enterAndCheckMargin(
   lineHeight: number,
   times: number,
 ): void {
-  cursor.incrementYCoordinate(
-    times * (lineHeight * (cursor.getSize() * POINT_TO_MM)),
-  );
+  cursor.incrementYCoordinate(times * (lineHeight * (cursor.getSize() * POINT_TO_MM)));
   if (
     standard.ORIENTATION === "landscape" &&
     cursor.getYCoordinate() >= pageParameters.PORTRAIT_WIDTH - standard.MARGIN
@@ -115,12 +97,5 @@ export function addLineSpace(
   pageParameters: FormatParameters,
   lineHeight: number,
 ): void {
-  return enterAndCheckMargin(
-    jsPDFInstance,
-    cursor,
-    standard,
-    pageParameters,
-    lineHeight,
-    1,
-  );
+  return enterAndCheckMargin(jsPDFInstance, cursor, standard, pageParameters, lineHeight, 1);
 }

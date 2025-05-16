@@ -1,11 +1,4 @@
-import {
-  Resume,
-  Header,
-  Work,
-  Education,
-  AwardsAndCertification,
-  Designation,
-} from "../models";
+import { Resume, Header, Work, Education, AwardsAndCertification, Designation } from "../models";
 
 /**
  * Maps markdown text to a Resume object
@@ -20,9 +13,7 @@ export function parseResumeMarkdown(markdown: string): Resume {
     competencies: parseCompetencies(sections.competencies),
     work: parseWork(sections.work),
     education: parseEducation(sections.education),
-    awardsAndCertifications: parseAwardsAndCertifications(
-      sections.awardsAndCertifications,
-    ),
+    awardsAndCertifications: parseAwardsAndCertifications(sections.awardsAndCertifications),
   };
 }
 
@@ -74,10 +65,7 @@ function splitIntoSections(markdown: string) {
  * @param preferLabel Whether to prefer the label over the URL
  * @returns Cleaned text with links processed
  */
-function processMarkdownLinks(
-  text: string,
-  preferLabel: boolean = true,
-): string {
+function processMarkdownLinks(text: string, preferLabel: boolean = true): string {
   // Handle empty links [](link) - remove them entirely
   text = text.replace(/\[\]\(([^)]+)\)/g, "");
 
@@ -100,7 +88,7 @@ function parseHeader(headerSection: string): Header {
   const contactLine = lines[2] || "";
   const contactItems = contactLine
     .split("|")
-    .map((item) => item.trim())
+    .map(item => item.trim())
     .filter(Boolean);
 
   let email = "";
@@ -108,8 +96,7 @@ function parseHeader(headerSection: string): Header {
   let leftDetail = "";
   let rightDetail = "";
 
-  contactItems.forEach((item) => {
-    item;
+  contactItems.forEach(item => {
     // Process email
     if (item.includes("@")) {
       email = item.trim();
@@ -117,10 +104,7 @@ function parseHeader(headerSection: string): Header {
       email = processMarkdownLinks(email, true);
     }
     // Process phone
-    else if (
-      item.match(/\(\d+\)/) ||
-      item.match(/\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/)
-    ) {
+    else if (item.match(/\(\d+\)/) || item.match(/\d{3}[-.\s]?\d{3}[-.\s]?\d{4}/)) {
       phone = processMarkdownLinks(item, true);
     }
     // Process LinkedIn or left detail
@@ -153,8 +137,8 @@ function parseCompetencies(competenciesSection: string): string[] {
   const competenciesText = competenciesSection.trim();
   return competenciesText
     .split("•")
-    .map((item) => processMarkdownLinks(item.trim(), true))
-    .filter((item) => item !== "");
+    .map(item => processMarkdownLinks(item.trim(), true))
+    .filter(item => item !== "");
 }
 
 /**
@@ -164,11 +148,9 @@ function parseWork(workSection: string): Work[] {
   if (!workSection) return [];
 
   const workEntries: Work[] = [];
-  const companyBlocks = workSection
-    .split(/(?=### )/g)
-    .filter((block) => block.trim() !== "");
+  const companyBlocks = workSection.split(/(?=### )/g).filter(block => block.trim() !== "");
 
-  companyBlocks.forEach((block) => {
+  companyBlocks.forEach(block => {
     const lines = block.trim().split("\n");
     const companyLine = lines[0].replace("### ", "").trim();
     const company = processMarkdownLinks(companyLine, true);
@@ -178,10 +160,7 @@ function parseWork(workSection: string): Work[] {
     let currentLineIndex = 1;
 
     // Skip any empty lines after company name
-    while (
-      currentLineIndex < lines.length &&
-      lines[currentLineIndex].trim() === ""
-    ) {
+    while (currentLineIndex < lines.length && lines[currentLineIndex].trim() === "") {
       currentLineIndex++;
     }
 
@@ -196,10 +175,7 @@ function parseWork(workSection: string): Work[] {
     }
 
     // Skip any empty lines after detail lines
-    while (
-      currentLineIndex < lines.length &&
-      lines[currentLineIndex].trim() === ""
-    ) {
+    while (currentLineIndex < lines.length && lines[currentLineIndex].trim() === "") {
       currentLineIndex++;
     }
 
@@ -214,17 +190,13 @@ function parseWork(workSection: string): Work[] {
 
     // Parse detail lines into designations
     const designations: Designation[] = [];
-    detailLines.forEach((detailLine) => {
-      const detailsParts = detailLine.split("|").map((part) => part.trim());
+    detailLines.forEach(detailLine => {
+      const detailsParts = detailLine.split("|").map(part => part.trim());
 
       const titlePart = detailsParts[0] || "";
-      const locationPart = detailsParts[1] || "";
       const periodPart = detailsParts[2] || "";
 
-      const title = processMarkdownLinks(
-        titlePart.replace(/\*\*/g, "").trim(),
-        true,
-      );
+      const title = processMarkdownLinks(titlePart.replace(/\*\*/g, "").trim(), true);
 
       // Parse period for the designation
       const periodMatch = periodPart.match(/(\w+ \d{4}).*?(\w+ \d{4}|Present)/);
@@ -241,10 +213,7 @@ function parseWork(workSection: string): Work[] {
 
     workEntries.push({
       company,
-      location: processMarkdownLinks(
-        detailLines[0].split("|").map((part) => part.trim())[1],
-        true,
-      ),
+      location: processMarkdownLinks(detailLines[0].split("|").map(part => part.trim())[1], true),
       designations,
       descriptions, // All descriptions belong to the company as a whole
     });
@@ -262,9 +231,9 @@ function parseEducation(educationSection: string): Education[] {
   const educationEntries: Education[] = [];
   const institutionBlocks = educationSection
     .split(/(?=### )/g)
-    .filter((block) => block.trim() !== "");
+    .filter(block => block.trim() !== "");
 
-  institutionBlocks.forEach((block) => {
+  institutionBlocks.forEach(block => {
     const lines = block.trim().split("\n");
     const institutionLine = lines[0].replace("### ", "").trim();
     const institution = processMarkdownLinks(institutionLine, true);
@@ -273,7 +242,7 @@ function parseEducation(educationSection: string): Education[] {
     const qualificationLine = lines[2] || "";
     const qualificationParts = qualificationLine
       .split("|")
-      .map((part) => part.replace("**", "").replace("**", "").trim());
+      .map(part => part.replace("**", "").replace("**", "").trim());
 
     const qualificationPart = qualificationParts[0] || "";
     const periodPart = qualificationParts[1] || "";
@@ -289,10 +258,7 @@ function parseEducation(educationSection: string): Education[] {
     // Check if there's an honors line
     if (lines.length > 3) {
       const potentialHonorsLine = lines[4]?.trim() || "";
-      if (
-        !potentialHonorsLine.startsWith("###") &&
-        potentialHonorsLine !== ""
-      ) {
+      if (!potentialHonorsLine.startsWith("###") && potentialHonorsLine !== "") {
         honorsAndGrade = processMarkdownLinks(potentialHonorsLine, true);
       }
     }
@@ -312,15 +278,13 @@ function parseEducation(educationSection: string): Education[] {
 /**
  * Parse the awards and certifications section
  */
-function parseAwardsAndCertifications(
-  awardsSection: string,
-): AwardsAndCertification[] {
+function parseAwardsAndCertifications(awardsSection: string): AwardsAndCertification[] {
   if (!awardsSection) return [];
 
   const awards: AwardsAndCertification[] = [];
   const lines = awardsSection.trim().split("\n");
 
-  lines.forEach((line) => {
+  lines.forEach(line => {
     if (line.startsWith("-")) {
       let awardText = line.substring(1).trim();
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import jsPDF from "jspdf";
 import { Resume } from "./resume_builder/models";
 import { Cursor } from "./resume_builder/class";
@@ -48,9 +48,7 @@ onMounted(() => {
     const contentClone = contentElement.cloneNode(true) as HTMLElement;
 
     // Remove the download button to avoid including it in the resume markdown
-    const downloadButtonContainer = contentClone.querySelector(
-      'div[style*="text-align: right"]',
-    );
+    const downloadButtonContainer = contentClone.querySelector('div[style*="text-align: right"]');
     if (downloadButtonContainer) {
       downloadButtonContainer.remove();
     }
@@ -80,7 +78,7 @@ function getMarkdownFromHTML(element: HTMLElement): string {
       // Process all child nodes for elements that might contain formatted content
       const processChildren = () => {
         let content = "";
-        el.childNodes.forEach((child) => {
+        el.childNodes.forEach(child => {
           content += processNode(child);
         });
         return content;
@@ -96,13 +94,14 @@ function getMarkdownFromHTML(element: HTMLElement): string {
           return `### ${processChildren()}\n\n`;
         case "p":
           return `${processChildren()}\n\n`;
-        case "ul":
+        case "ul": {
           let listItems = "";
-          el.querySelectorAll("li").forEach((li) => {
+          el.querySelectorAll("li").forEach(li => {
             // Process each list item to handle nested elements
             listItems += `- ${processNode(li)}\n`;
           });
           return listItems + "\n";
+        }
         case "li":
           return processChildren();
         case "a":
@@ -121,7 +120,7 @@ function getMarkdownFromHTML(element: HTMLElement): string {
     return "";
   };
   // Process all child nodes
-  element.childNodes.forEach((child) => {
+  element.childNodes.forEach(child => {
     markdown += processNode(child);
   });
 
@@ -189,15 +188,13 @@ function downloadResume() {
 <template>
   <button
     v-if="isClient"
-    @click="downloadResume"
     :class="[
       '!border-none !py-2.5 !px-6 !text-center !no-underline !inline-block !text-base !m-1 !cursor-pointer !rounded-full !font-medium !transition-all !duration-300 !shadow-sm',
       '!font-sans !tracking-wide',
-      isDark
-        ? '!bg-[#0059aa] hover:!bg-[#004c91]'
-        : '!bg-[#3e94e8] hover:!bg-[#2a7fd1]',
+      isDark ? '!bg-[#0059aa] hover:!bg-[#004c91]' : '!bg-[#3e94e8] hover:!bg-[#2a7fd1]',
       '!text-white',
     ]"
+    @click="downloadResume"
   >
     {{ buttonText || "Download Resume" }}
   </button>
