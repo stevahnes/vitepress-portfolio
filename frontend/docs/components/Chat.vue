@@ -34,7 +34,7 @@ const chatWindowRef = ref<HTMLDivElement | null>(null);
 
 // --- Message Input Handling ---
 const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
+  if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     if (userInput.value.trim()) {
       sendMessage();
@@ -47,7 +47,7 @@ const resizeTextarea = () => {
   if (!inputRef.value) return;
 
   // Reset height to auto first to get the correct scrollHeight
-  inputRef.value.style.height = 'auto';
+  inputRef.value.style.height = "auto";
 
   // Set new height based on scrollHeight (with a max height)
   const newHeight = Math.min(inputRef.value.scrollHeight, 200);
@@ -230,7 +230,7 @@ const sendMessage = async () => {
     userInput.value = "";
     // Reset textarea height
     if (inputRef.value) {
-      inputRef.value.style.height = 'auto';
+      inputRef.value.style.height = "auto";
     }
     inputRef.value?.focus();
     await scrollToBottom();
@@ -361,123 +361,181 @@ onMounted(async () => {
     // Initialize textarea resize
     if (inputRef.value) {
       resizeTextarea();
-      inputRef.value.addEventListener('input', resizeTextarea);
+      inputRef.value.addEventListener("input", resizeTextarea);
     }
   });
 });
 
 // --- Watchers ---
 watch(messages, () => scrollToBottom(), { deep: true });
-watch(isDark, () => { }, { immediate: true });
+watch(isDark, () => {}, { immediate: true });
 </script>
 
 <template>
-  <div v-if="isClient" ref="chatWindowRef" :style="{ height: `${chatHeight}px`, ...cssVars }" :class="[
-    '!relative',
-    '!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg',
-    clientSideTheme && isDark
-      ? '!border !border-gray-700 !bg-gray-900'
-      : '!border !border-gray-200 !bg-gray-50',
-  ]">
-    <!-- Header -->
-    <div :class="[
-      '!mb-4 !pb-3 !flex !items-center !justify-between',
+  <div
+    v-if="isClient"
+    ref="chatWindowRef"
+    :style="{ height: `${chatHeight}px`, ...cssVars }"
+    :class="[
+      '!relative',
+      '!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg',
       clientSideTheme && isDark
-        ? '!border-b !border-gray-700'
-        : '!border-b !border-gray-200',
-    ]">
+        ? '!border !border-gray-700 !bg-gray-900'
+        : '!border !border-gray-200 !bg-gray-50',
+    ]"
+  >
+    <!-- Header -->
+    <div
+      :class="[
+        '!mb-4 !pb-3 !flex !items-center !justify-between',
+        clientSideTheme && isDark
+          ? '!border-b !border-gray-700'
+          : '!border-b !border-gray-200',
+      ]"
+    >
       <div class="!flex !items-center">
         <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
-        <h3 :class="clientSideTheme && isDark
-          ? '!text-gray-100 !font-medium'
-          : '!text-gray-800 !font-medium'
-          ">
+        <h3
+          :class="
+            clientSideTheme && isDark
+              ? '!text-gray-100 !font-medium'
+              : '!text-gray-800 !font-medium'
+          "
+        >
           Chat with Advocado 🥑
         </h3>
       </div>
-      <button v-if="hasOngoingThread" @click="endChat" :disabled="isEndingChat" :class="[
-        '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
-        '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
-        isEndingChat && '!opacity-50 !cursor-not-allowed',
-      ]">
+      <button
+        v-if="hasOngoingThread"
+        @click="endChat"
+        :disabled="isEndingChat"
+        :class="[
+          '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
+          '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
+          isEndingChat && '!opacity-50 !cursor-not-allowed',
+        ]"
+      >
         {{ isEndingChat ? "Ending..." : "End Chat" }}
       </button>
     </div>
 
     <!-- Initial loading indicator -->
-    <div v-if="isInitialLoading" class="!flex-1 !flex !items-center !justify-center">
+    <div
+      v-if="isInitialLoading"
+      class="!flex-1 !flex !items-center !justify-center"
+    >
       <div class="!flex !flex-col !items-center !space-y-4">
-        <div class="!h-8 !w-8 !border-4 !border-indigo-600 !border-t-transparent !rounded-full !animate-spin"></div>
-        <p :class="clientSideTheme && isDark ? '!text-gray-300' : '!text-gray-600'
-          ">
+        <div
+          class="!h-8 !w-8 !border-4 !border-indigo-600 !border-t-transparent !rounded-full !animate-spin"
+        ></div>
+        <p
+          :class="
+            clientSideTheme && isDark ? '!text-gray-300' : '!text-gray-600'
+          "
+        >
           Loading conversation...
         </p>
       </div>
     </div>
 
     <!-- Messages area -->
-    <div v-else ref="chatContainerRef" class="!flex-1 !overflow-auto !space-y-4 !flex !flex-col !px-1">
-      <div v-for="(msg, index) in messages" :key="index" class="!flex !w-full !mb-3"
-        :class="[msg.role === 'user' ? '!justify-end' : '!justify-start']">
-        <div v-if="msg.content.trim().length > 0" :class="[
-          '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
-          msg.role === 'user'
-            ? '!bg-indigo-600 !text-white'
-            : clientSideTheme && isDark
-              ? '!bg-gray-800 !text-gray-100 !border !border-gray-700'
-              : '!bg-white !text-gray-800 !border !border-gray-200',
-        ]">
+    <div
+      v-else
+      ref="chatContainerRef"
+      class="!flex-1 !overflow-auto !space-y-4 !flex !flex-col !px-1"
+    >
+      <div
+        v-for="(msg, index) in messages"
+        :key="index"
+        class="!flex !w-full !mb-3"
+        :class="[msg.role === 'user' ? '!justify-end' : '!justify-start']"
+      >
+        <div
+          v-if="msg.content.trim().length > 0"
+          :class="[
+            '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
+            msg.role === 'user'
+              ? '!bg-indigo-600 !text-white'
+              : clientSideTheme && isDark
+                ? '!bg-gray-800 !text-gray-100 !border !border-gray-700'
+                : '!bg-white !text-gray-800 !border !border-gray-200',
+          ]"
+        >
           <div class="!flex !justify-between !items-center !mb-1">
-            <span :class="[
-              '!text-xs',
-              msg.role === 'user'
-                ? '!text-gray-200'
-                : clientSideTheme && isDark
-                  ? '!text-gray-400'
-                  : '!text-gray-500',
-            ]">{{ msg.role === "user" ? "You" : "Advocado" }}</span>
-            <span v-if="msg.timestamp" :class="[
-              '!text-xs !ml-4',
-              msg.role === 'user'
-                ? '!text-gray-200'
-                : clientSideTheme && isDark
-                  ? '!text-gray-400'
-                  : '!text-gray-500',
-            ]">{{ formatTime(msg.timestamp) }}</span>
+            <span
+              :class="[
+                '!text-xs',
+                msg.role === 'user'
+                  ? '!text-gray-200'
+                  : clientSideTheme && isDark
+                    ? '!text-gray-400'
+                    : '!text-gray-500',
+              ]"
+              >{{ msg.role === "user" ? "You" : "Advocado" }}</span
+            >
+            <span
+              v-if="msg.timestamp"
+              :class="[
+                '!text-xs !ml-4',
+                msg.role === 'user'
+                  ? '!text-gray-200'
+                  : clientSideTheme && isDark
+                    ? '!text-gray-400'
+                    : '!text-gray-500',
+              ]"
+              >{{ formatTime(msg.timestamp) }}</span
+            >
           </div>
-          <div class="!whitespace-pre-wrap markdown-content" v-html="parseMarkdown(msg.content)"></div>
+          <div
+            class="!whitespace-pre-wrap markdown-content"
+            v-html="parseMarkdown(msg.content)"
+          ></div>
         </div>
       </div>
 
       <!-- Typing indicator -->
       <div v-if="loading" class="!flex !justify-start !w-full">
-        <div :class="[
-          '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
-          clientSideTheme && isDark
-            ? '!bg-gray-800 !text-gray-300 !border !border-gray-700'
-            : '!bg-white !text-gray-600 !border !border-gray-200',
-        ]">
+        <div
+          :class="[
+            '!rounded-lg !px-4 !py-3 !max-w-[85%] !shadow-md',
+            clientSideTheme && isDark
+              ? '!bg-gray-800 !text-gray-300 !border !border-gray-700'
+              : '!bg-white !text-gray-600 !border !border-gray-200',
+          ]"
+        >
           <div class="!flex !justify-between !items-center !mb-1">
-            <span :class="clientSideTheme && isDark
-              ? '!text-xs !text-gray-400'
-              : '!text-xs !text-gray-500'
-              ">Advocado</span>
-            <span :class="clientSideTheme && isDark
-              ? '!text-xs !text-gray-400 !ml-4'
-              : '!text-xs !text-gray-500 !ml-4'
-              ">
+            <span
+              :class="
+                clientSideTheme && isDark
+                  ? '!text-xs !text-gray-400'
+                  : '!text-xs !text-gray-500'
+              "
+              >Advocado</span
+            >
+            <span
+              :class="
+                clientSideTheme && isDark
+                  ? '!text-xs !text-gray-400 !ml-4'
+                  : '!text-xs !text-gray-500 !ml-4'
+              "
+            >
               {{ formatTime(Date.now()) }}
             </span>
           </div>
           <div class="!flex !items-center">
-            <span v-for="(_, i) in 3" :key="i" :class="[
-              '!inline-block !h-2 !w-2 !rounded-full !animate-pulse',
-              clientSideTheme && isDark ? '!bg-gray-400' : '!bg-gray-300',
-            ]" :style="{
-              marginLeft: i > 0 ? '0.25rem' : 0,
-              marginRight: i < 2 ? '0.25rem' : 0,
-              animationDelay: `${i * 0.2}s`,
-            }"></span>
+            <span
+              v-for="(_, i) in 3"
+              :key="i"
+              :class="[
+                '!inline-block !h-2 !w-2 !rounded-full !animate-pulse',
+                clientSideTheme && isDark ? '!bg-gray-400' : '!bg-gray-300',
+              ]"
+              :style="{
+                marginLeft: i > 0 ? '0.25rem' : 0,
+                marginRight: i < 2 ? '0.25rem' : 0,
+                animationDelay: `${i * 0.2}s`,
+              }"
+            ></span>
           </div>
         </div>
       </div>
@@ -486,113 +544,173 @@ watch(isDark, () => { }, { immediate: true });
     <!-- Resize handle -->
     <div
       class="!mb-6 !h-2 !w-full !cursor-ns-resize !flex !justify-center !items-center hover:!bg-gray-300 dark:hover:!bg-gray-700 !transition-colors !rounded-b-lg"
-      @mousedown="startResize" @touchstart="startResize">
-      <div :class="[
-        '!w-12 !h-1 !rounded-full',
-        clientSideTheme && isDark ? '!bg-gray-600' : '!bg-gray-300',
-      ]"></div>
+      @mousedown="startResize"
+      @touchstart="startResize"
+    >
+      <div
+        :class="[
+          '!w-12 !h-1 !rounded-full',
+          clientSideTheme && isDark ? '!bg-gray-600' : '!bg-gray-300',
+        ]"
+      ></div>
     </div>
 
     <!-- Prompt Suggestions (responsive scroll bar, no buttons) -->
     <div class="!mb-0.5 !relative">
-      <div ref="promptBarRef" class="prompt-bar !flex !overflow-x-auto !space-x-2 !pb-1 !scroll-smooth !px-2"
-        @scroll="updatePromptScrollButtons">
-        <button v-for="(suggestion, idx) in promptSuggestions" :key="idx" type="button"
-          @click="setSuggestion(suggestion)" :class="[
+      <div
+        ref="promptBarRef"
+        class="prompt-bar !flex !overflow-x-auto !space-x-2 !pb-1 !scroll-smooth !px-2"
+        @scroll="updatePromptScrollButtons"
+      >
+        <button
+          v-for="(suggestion, idx) in promptSuggestions"
+          :key="idx"
+          type="button"
+          @click="setSuggestion(suggestion)"
+          :class="[
             '!px-4 !py-2 !rounded-full !text-sm !font-medium !transition-colors !duration-200 !shadow',
             '!border !whitespace-nowrap',
             clientSideTheme && isDark
               ? '!bg-gray-800 !text-gray-100 !border-gray-700 hover:!bg-gray-700'
               : '!bg-white !text-gray-800 !border-gray-200 hover:!bg-gray-100',
-          ]">
+          ]"
+        >
           {{ suggestion }}
         </button>
       </div>
     </div>
 
     <!-- Input form -->
-    <form @submit.prevent="sendMessage" :class="[
-      '!mt-4 !flex !rounded-lg !overflow-hidden !shadow-md',
-      clientSideTheme && isDark
-        ? '!bg-gray-800 !border !border-gray-700'
-        : '!bg-gray-100 !border !border-gray-200',
-    ]">
-      <textarea ref="inputRef" v-model="userInput" @keydown="handleKeyDown" placeholder="Ask something about Steve..."
+    <form
+      @submit.prevent="sendMessage"
+      :class="[
+        '!mt-4 !flex !rounded-lg !overflow-hidden !shadow-md',
+        clientSideTheme && isDark
+          ? '!bg-gray-800 !border !border-gray-700'
+          : '!bg-gray-100 !border !border-gray-200',
+      ]"
+    >
+      <textarea
+        ref="inputRef"
+        v-model="userInput"
+        @keydown="handleKeyDown"
+        placeholder="Ask something about Steve..."
         :class="[
           '!flex-1 !border-0 !p-3 !outline-none !focus:ring-0 !focus:ring-offset-0 !resize-none',
           '!min-h-[42px] !max-h-[200px] !overflow-y-auto',
           clientSideTheme && isDark
             ? '!bg-gray-800 !text-gray-100 !placeholder-gray-500'
             : '!bg-gray-100 !text-gray-800 !placeholder-gray-400',
-        ]" :disabled="loading" rows="1"></textarea>
-      <button type="submit"
+        ]"
+        :disabled="loading"
+        rows="1"
+      ></textarea>
+      <button
+        type="submit"
         class="!bg-indigo-600 !hover:bg-indigo-700 !text-white !px-4 !transition-colors !duration-200 !ease-in-out !flex !items-center !justify-center !min-w-[60px]"
-        :disabled="loading">
-        <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="!h-5 !w-5" fill="none" viewBox="0 0 24 24"
-          stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        :disabled="loading"
+      >
+        <svg
+          v-if="!loading"
+          xmlns="http://www.w3.org/2000/svg"
+          class="!h-5 !w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+          />
         </svg>
-        <div v-else class="!h-5 !w-5 !border-2 !border-t-transparent !border-white !rounded-full !animate-spin"></div>
+        <div
+          v-else
+          class="!h-5 !w-5 !border-2 !border-t-transparent !border-white !rounded-full !animate-spin"
+        ></div>
       </button>
     </form>
 
     <!-- Feedback Modal (inside chat window) -->
-    <div v-if="showFeedbackModal" class="!absolute !inset-0 !flex !items-center !justify-center !z-50">
-      <div :class="[
-        '!absolute !inset-0',
-        clientSideTheme && isDark
-          ? '!bg-black !bg-opacity-60'
-          : '!bg-white !bg-opacity-60',
-      ]"></div>
-      <div :class="[
-        '!relative !rounded-lg !p-6 !w-96 !shadow-xl',
-        clientSideTheme && isDark
-          ? '!bg-gray-800 !text-white'
-          : '!bg-white !text-gray-800',
-      ]">
-        <h3 :class="[
-          '!text-lg !font-medium !mb-4',
-          clientSideTheme && isDark ? '!text-white' : '!text-gray-900',
-        ]">
+    <div
+      v-if="showFeedbackModal"
+      class="!absolute !inset-0 !flex !items-center !justify-center !z-50"
+    >
+      <div
+        :class="[
+          '!absolute !inset-0',
+          clientSideTheme && isDark
+            ? '!bg-black !bg-opacity-60'
+            : '!bg-white !bg-opacity-60',
+        ]"
+      ></div>
+      <div
+        :class="[
+          '!relative !rounded-lg !p-6 !w-96 !shadow-xl',
+          clientSideTheme && isDark
+            ? '!bg-gray-800 !text-white'
+            : '!bg-white !text-gray-800',
+        ]"
+      >
+        <h3
+          :class="[
+            '!text-lg !font-medium !mb-4',
+            clientSideTheme && isDark ? '!text-white' : '!text-gray-900',
+          ]"
+        >
           How was your chat experience?
         </h3>
         <div class="!flex !space-x-4 !mb-6">
-          <button @click="feedback = 'good'" :class="[
-            '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
-            feedback === 'good'
-              ? '!bg-green-500 !text-white'
-              : clientSideTheme && isDark
-                ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
-                : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
-          ]">
+          <button
+            @click="feedback = 'good'"
+            :class="[
+              '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
+              feedback === 'good'
+                ? '!bg-green-500 !text-white'
+                : clientSideTheme && isDark
+                  ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+                  : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
+            ]"
+          >
             Good 👍
           </button>
-          <button @click="feedback = 'bad'" :class="[
-            '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
-            feedback === 'bad'
-              ? '!bg-red-500 !text-white'
-              : clientSideTheme && isDark
-                ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
-                : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
-          ]">
+          <button
+            @click="feedback = 'bad'"
+            :class="[
+              '!flex-1 !py-2 !px-4 !rounded-lg !transition-colors !duration-200',
+              feedback === 'bad'
+                ? '!bg-red-500 !text-white'
+                : clientSideTheme && isDark
+                  ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+                  : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
+            ]"
+          >
             Bad 👎
           </button>
         </div>
         <div class="!flex !justify-end !space-x-3">
-          <button @click="closeFeedbackModal" :class="[
-            '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
-            clientSideTheme && isDark
-              ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
-              : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
-          ]">
+          <button
+            @click="closeFeedbackModal"
+            :class="[
+              '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
+              clientSideTheme && isDark
+                ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
+                : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
+            ]"
+          >
             Cancel
           </button>
-          <button @click="submitFeedback" :disabled="!feedback || isEndingChat" :class="[
-            '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
-            !feedback || isEndingChat
-              ? '!bg-gray-400 !text-white !cursor-not-allowed'
-              : '!bg-indigo-600 !text-white !hover:bg-indigo-700',
-          ]">
+          <button
+            @click="submitFeedback"
+            :disabled="!feedback || isEndingChat"
+            :class="[
+              '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
+              !feedback || isEndingChat
+                ? '!bg-gray-400 !text-white !cursor-not-allowed'
+                : '!bg-indigo-600 !text-white !hover:bg-indigo-700',
+            ]"
+          >
             {{ isEndingChat ? "Ending..." : "End Chat" }}
           </button>
         </div>
@@ -600,9 +718,13 @@ watch(isDark, () => { }, { immediate: true });
     </div>
   </div>
 
-  <div v-else
-    class="!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative !border !border-gray-200 !bg-gray-50">
-    <div class="!mb-4 !pb-3 !flex !items-center !justify-between !border-b !border-gray-200">
+  <div
+    v-else
+    class="!flex !w-full !flex-col !rounded-lg !p-4 !shadow-lg !relative !border !border-gray-200 !bg-gray-50"
+  >
+    <div
+      class="!mb-4 !pb-3 !flex !items-center !justify-between !border-b !border-gray-200"
+    >
       <div class="!flex !items-center">
         <div class="!h-3 !w-3 !rounded-full !bg-green-500 !mr-2"></div>
         <h3 class="!text-gray-800 !font-medium">Chat with Advocado 🥑</h3>
