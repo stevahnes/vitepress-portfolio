@@ -318,6 +318,7 @@ onMounted(async () => {
   isClient.value = true;
   clientSideTheme.value = true;
   threadId.value = typeof localStorage !== "undefined" ? localStorage.getItem("threadId") : null;
+  // Render chat UI immediately
   if (messages.value.length === 0) {
     messages.value = [
       {
@@ -330,31 +331,44 @@ onMounted(async () => {
   if (isClient.value) {
     const existingThreadId = localStorage.getItem("threadId");
     if (existingThreadId) {
+      // Start loading past messages in the background
       isInitialLoading.value = true;
-      try {
-        const messagesResponse = await fetch(
-          `https://advocado-agent.vercel.app/thread/listMessages?threadId=${existingThreadId}`,
-        );
-        const messagesData = await messagesResponse.json();
-        if (messagesData && Array.isArray(messagesData)) {
-          messages.value = messagesData.map((msg: Message) => ({
-            role: msg.role,
-            content: msg.content ? msg.content : "",
-            timestamp: Date.now(),
-          }));
-        }
-      } catch (error) {
-        console.error("Error fetching thread messages:", error);
-        messages.value = [
-          {
-            role: "assistant",
-            content: "Hi! What would you like to learn about Steve today?",
-            timestamp: Date.now(),
-          },
-        ];
-      } finally {
-        isInitialLoading.value = false;
-      }
+      fetch(`https://advocado-agent.vercel.app/thread/listMessages?threadId=${existingThreadId}`)
+        .then(messagesResponse => messagesResponse.json())
+        .then(messagesData => {
+          if (messagesData && Array.isArray(messagesData)) {
+            // Only prepend if user hasn't sent a new message yet
+            if (
+              messages.value.length === 1 &&
+              messages.value[0].role === "assistant" &&
+              messages.value[0].content.includes(
+                "Hi! What would you like to learn about Steve today?",
+              )
+            ) {
+              messages.value = messagesData.map((msg: Message) => ({
+                role: msg.role,
+                content: msg.content ? msg.content : "",
+                timestamp: Date.now(),
+              }));
+            } else {
+              // Merge past messages with any new ones
+              messages.value = [
+                ...messagesData.map(msg => ({
+                  role: msg.role,
+                  content: msg.content ? msg.content : "",
+                  timestamp: Date.now(),
+                })),
+                ...messages.value,
+              ];
+            }
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching thread messages:", error);
+        })
+        .finally(() => {
+          isInitialLoading.value = false;
+        });
     }
     if (chatWindowRef.value) {
       const savedHeight = localStorage.getItem("chatHeight");
@@ -400,6 +414,17 @@ watch(
         : '!border !border-gray-200 !bg-gray-50',
     ]"
   >
+    <!-- Overlay for initial loading -->
+    <div v-if="isInitialLoading" class="chat-loading-overlay">
+      <div class="chat-loading-content">
+        <div
+          class="!h-8 !w-8 !border-4 !border-indigo-600 !border-t-transparent !rounded-full !animate-spin"
+        ></div>
+        <p :class="clientSideTheme && isDark ? '!text-gray-200' : '!text-gray-700'">
+          Loading past conversations...
+        </p>
+      </div>
+    </div>
     <!-- Header -->
     <div
       :class="[
@@ -421,11 +446,11 @@ watch(
       </div>
       <button
         v-if="hasOngoingThread"
-        :disabled="isEndingChat"
+        :disabled="isEndingChat || isInitialLoading"
         :class="[
           '!px-3 !py-1 !rounded-lg !text-sm !transition-colors !duration-200 !ease-in-out',
           '!bg-indigo-600 !hover:bg-indigo-700 !text-white',
-          isEndingChat && '!opacity-50 !cursor-not-allowed',
+          (isEndingChat || isInitialLoading) && '!opacity-50 !cursor-not-allowed',
         ]"
         @click="endChat"
       >
@@ -433,24 +458,8 @@ watch(
       </button>
     </div>
 
-    <!-- Initial loading indicator -->
-    <div v-if="isInitialLoading" class="!flex-1 !flex !items-center !justify-center">
-      <div class="!flex !flex-col !items-center !space-y-4">
-        <div
-          class="!h-8 !w-8 !border-4 !border-indigo-600 !border-t-transparent !rounded-full !animate-spin"
-        ></div>
-        <p :class="clientSideTheme && isDark ? '!text-gray-300' : '!text-gray-600'">
-          Loading conversation...
-        </p>
-      </div>
-    </div>
-
     <!-- Messages area -->
-    <div
-      v-else
-      ref="chatContainerRef"
-      class="!flex-1 !overflow-auto !space-y-4 !flex !flex-col !px-1"
-    >
+    <div ref="chatContainerRef" class="!flex-1 !overflow-auto !space-y-4 !flex !flex-col !px-1">
       <div
         v-for="(msg, index) in messages"
         :key="index"
@@ -573,12 +582,14 @@ watch(
           v-for="(suggestion, idx) in promptSuggestions"
           :key="idx"
           type="button"
+          :disabled="isInitialLoading"
           :class="[
             '!px-4 !py-2 !rounded-full !text-sm !font-medium !transition-colors !duration-200 !shadow',
             '!border !whitespace-nowrap',
             clientSideTheme && isDark
               ? '!bg-gray-800 !text-gray-100 !border-gray-700 hover:!bg-gray-700'
               : '!bg-white !text-gray-800 !border-gray-200 hover:!bg-gray-100',
+            isInitialLoading && '!opacity-50 !cursor-not-allowed',
           ]"
           @click="setSuggestion(suggestion)"
         >
@@ -608,14 +619,14 @@ watch(
             ? '!bg-gray-800 !text-gray-100 !placeholder-gray-500'
             : '!bg-gray-100 !text-gray-800 !placeholder-gray-400',
         ]"
-        :disabled="loading"
+        :disabled="loading || isInitialLoading"
         rows="1"
         @keydown="handleKeyDown"
       ></textarea>
       <button
         type="submit"
         class="!bg-indigo-600 !hover:bg-indigo-700 !text-white !px-4 !transition-colors !duration-200 !ease-in-out !flex !items-center !justify-center !min-w-[60px]"
-        :disabled="loading"
+        :disabled="loading || isInitialLoading"
       >
         <svg
           v-if="!loading"
@@ -674,6 +685,7 @@ watch(
                   ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
                   : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
             ]"
+            :disabled="isInitialLoading"
             @click="feedback = 'good'"
           >
             Good 👍
@@ -687,6 +699,7 @@ watch(
                   ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
                   : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
             ]"
+            :disabled="isInitialLoading"
             @click="feedback = 'bad'"
           >
             Bad 👎
@@ -700,15 +713,16 @@ watch(
                 ? '!bg-gray-700 !text-gray-300 !hover:bg-gray-600'
                 : '!bg-gray-100 !text-gray-700 !hover:bg-gray-200',
             ]"
+            :disabled="isInitialLoading"
             @click="closeFeedbackModal"
           >
             Cancel
           </button>
           <button
-            :disabled="!feedback || isEndingChat"
+            :disabled="!feedback || isEndingChat || isInitialLoading"
             :class="[
               '!px-4 !py-2 !rounded-lg !transition-colors !duration-200',
-              !feedback || isEndingChat
+              !feedback || isEndingChat || isInitialLoading
                 ? '!bg-gray-400 !text-white !cursor-not-allowed'
                 : '!bg-indigo-600 !text-white !hover:bg-indigo-700',
             ]"
@@ -858,5 +872,28 @@ watch(
 .hide-scrollbar {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
+}
+
+/* Overlay for initial loading */
+.chat-loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  background: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: all;
+}
+
+.dark .chat-loading-overlay {
+  background: rgba(30, 30, 30, 0.7);
+}
+
+.chat-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
 </style>
