@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import DownloadResumeButton from './components/DownloadResume.vue'
+import { defineAsyncComponent } from 'vue'
+
+const DownloadResumeButton = defineAsyncComponent(() => 
+  import('./components/DownloadResume.vue')
+)
 </script>
 
 <div style="text-align: right; margin-bottom: 20px;">
