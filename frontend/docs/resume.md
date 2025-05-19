@@ -1,9 +1,25 @@
 <script setup lang="ts">
-import DownloadResumeButton from './components/DownloadResume.vue'
+import { defineAsyncComponent, ref, onMounted } from 'vue'
+
+const isClient = ref(false)
+onMounted(() => {
+  isClient.value = true
+})
+
+const DownloadResumeButton = defineAsyncComponent({
+  loader: () => import('./components/DownloadResume.vue'),
+  loadingComponent: {
+    template: `<button class="!border-none !py-2.5 !px-6 !text-center !no-underline !inline-block !text-base !m-1 !cursor-wait !rounded-full !font-medium !transition-all !duration-300 !shadow-sm !font-sans !tracking-wide !bg-gray-400 !text-white">Loading...</button>`
+  },
+  delay: 0,
+  timeout: 10000
+})
 </script>
 
 <div style="text-align: right; margin-bottom: 20px;">
-  <DownloadResumeButton filename="Stevanus SATRIA.pdf" />
+  <ClientOnly>
+    <DownloadResumeButton filename="Stevanus SATRIA.pdf" />
+  </ClientOnly>
 </div>
 
 # STEVANUS SATRIA

@@ -11,7 +11,11 @@ hero:
 ---
 
 <script setup lang="ts">
-  import Chat from './components/Chat.vue'
+import { defineAsyncComponent } from 'vue'
+
+const Chat = defineAsyncComponent(() => 
+  import('./components/Chat.vue')
+)
 </script>
 
 <Chat />

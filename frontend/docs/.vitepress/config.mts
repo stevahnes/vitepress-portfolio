@@ -350,5 +350,19 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss(), ViteImageOptimizer()] as any,
+    build: {
+      chunkSizeWarningLimit: 500,
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            chat: ["./docs/components/Chat.vue"],
+            "download-resume": ["./docs/components/DownloadResume.vue"],
+          },
+        },
+      },
+    },
+    optimizeDeps: {
+      include: ["vue", "marked", "jspdf"],
+    },
   },
 });

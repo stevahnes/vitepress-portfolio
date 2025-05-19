@@ -26,7 +26,7 @@ module.exports = {
     ecmaVersion: "latest", // Using "latest" to align with esnext in TypeScript
     sourceType: "module",
   },
-  plugins: ["vue", "@typescript-eslint"],
+  plugins: ["vue", "@typescript-eslint", "markdown"],
   rules: {
     // Vue specific rules
     "vue/require-default-prop": "off", // Optional if you don't want to require default values for props
@@ -38,11 +38,23 @@ module.exports = {
   },
   overrides: [
     {
-      files: ["*.md", "*.md/*.*"], // Apply to Markdown files and code blocks within them
+      files: ["**/*.md"],
+      processor: "markdown/markdown",
+    },
+    {
+      // For code blocks inside markdown files
+      files: ["**/*.md/**/*.{js,ts,vue}"],
+      parserOptions: {
+        ecmaFeatures: {
+          impliedStrict: true,
+        },
+      },
       rules: {
         "vue/html-self-closing": "off", // Markdown sometimes has issues with self-closing tags
         "vue/max-attributes-per-line": "off", // Allow multiple attributes per line in Markdown examples
         "@typescript-eslint/no-unused-vars": "off", // Ignore unused vars in code examples
+        "no-undef": "off", // Code snippets might not include all variable declarations
+        "no-unused-vars": "off", // Code snippets might not use all declared variables
       },
     },
   ],

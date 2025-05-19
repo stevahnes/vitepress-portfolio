@@ -29,8 +29,13 @@ const props = defineProps({
 
 // Use client-side only rendering to prevent hydration mismatch
 const isClient = ref(false);
+const isReady = ref(false);
 onMounted(() => {
   isClient.value = true;
+  // Small delay to ensure proper hydration
+  setTimeout(() => {
+    isReady.value = true;
+  }, 100);
 });
 
 // Store the markdown content
@@ -187,7 +192,7 @@ function downloadResume() {
 
 <template>
   <button
-    v-if="isClient"
+    v-if="isReady"
     :class="[
       '!border-none !py-2.5 !px-6 !text-center !no-underline !inline-block !text-base !m-1 !cursor-pointer !rounded-full !font-medium !transition-all !duration-300 !shadow-sm',
       '!font-sans !tracking-wide',
@@ -200,9 +205,9 @@ function downloadResume() {
   </button>
   <button
     v-else
-    class="!border-none !py-2.5 !px-6 !text-center !no-underline !inline-block !text-base !m-1 !cursor-pointer !rounded-full !font-medium !transition-all !duration-300 !shadow-sm !font-sans !tracking-wide !bg-[#0059aa] !text-white"
+    class="!border-none !py-2.5 !px-6 !text-center !no-underline !inline-block !text-base !m-1 !cursor-wait !rounded-full !font-medium !transition-all !duration-300 !shadow-sm !font-sans !tracking-wide !bg-gray-400 !text-white"
   >
-    {{ buttonText || "Download Resume" }}
+    Loading...
   </button>
 </template>
 
