@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  content: ["./docs/.vuepress/**/*.{vue,js,ts,md}", "./docs/**/*.{vue,js,ts,md}"],
+  content: ["./docs/**/*.{vue,js,ts,jsx,tsx,md}", "./docs/.vitepress/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {},
   plugins: [],
 } satisfies Config;
