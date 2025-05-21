@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, nextTick, onMounted, watch, computed } from "vue";
+import { ref, nextTick, onMounted, watch, computed, onBeforeUnmount } from "vue";
 import { marked } from "marked";
 import { useData } from "vitepress";
 import { Message, Role } from "langbase";
@@ -27,6 +27,7 @@ const threadId = ref<string | null>(null);
 const promptBarRef = ref<HTMLDivElement | null>(null);
 const showLeftScroll = ref(false);
 const showRightScroll = ref(false);
+const isFirstMessageSent = ref(false); // Track if first message has been sent
 
 // --- DOM Refs ---
 const inputRef = ref<HTMLTextAreaElement | null>(null);
@@ -89,6 +90,28 @@ const scrollToBottom = async (): Promise<void> => {
   if (chatContainerRef.value) {
     chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
   }
+};
+
+// Set the chat window to full height and scroll to it
+const setFullHeightAndScroll = async (): Promise<void> => {
+  if (!isClient.value || !chatWindowRef.value) return;
+
+  // Calculate viewport height and set chat height
+  const viewportHeight = window.innerHeight;
+  const offsetTop = chatWindowRef.value.getBoundingClientRect().top + window.pageYOffset;
+
+  // Set chat height to viewport height
+  chatHeight.value = viewportHeight;
+
+  // Save height to localStorage
+  localStorage.setItem("chatHeight", chatHeight.value.toString());
+
+  // Scroll the window to position the chat at the top
+  await nextTick();
+  window.scrollTo({
+    top: offsetTop,
+    behavior: "smooth",
+  });
 };
 
 const updatePromptScrollButtons = (): void => {
@@ -156,11 +179,25 @@ const stopResize = (): void => {
 // --- Message Handling ---
 const sendMessage = async (): Promise<void> => {
   if (!userInput.value.trim()) return;
+
+  // Check if this is the first user message being sent
+  const isFirstMessage =
+    messages.value.length <= 1 &&
+    messages.value[0]?.role === "assistant" &&
+    messages.value[0]?.content.includes("Hi! What would you like to learn about Steve today?");
+
   messages.value.push({
     role: "user",
     content: userInput.value,
     timestamp: Date.now(),
   });
+
+  // If this is the first actual message from the user, expand to full screen
+  if (isFirstMessage && !isFirstMessageSent.value) {
+    isFirstMessageSent.value = true;
+    setFullHeightAndScroll();
+  }
+
   let currentAssistantContent = "";
   let assistantMessageAdded = false;
   loading.value = true;
@@ -313,6 +350,16 @@ function setSuggestion(suggestion: string): void {
   inputRef.value?.focus();
 }
 
+// --- Window Resize Event Handler ---
+const handleWindowResize = () => {
+  // If we've sent the first message, update the height to fit the viewport
+  if (isFirstMessageSent.value) {
+    chatHeight.value = window.innerHeight;
+    localStorage.setItem("chatHeight", chatHeight.value.toString());
+  }
+  updatePromptScrollButtons();
+};
+
 // --- Initial Load ---
 onMounted(async () => {
   isClient.value = true;
@@ -361,6 +408,14 @@ onMounted(async () => {
                 ...messages.value,
               ];
             }
+
+            // If there are user messages, we've already had a conversation
+            const hasUserMessages = messagesData.some((msg: Message) => msg.role === "user");
+            if (hasUserMessages) {
+              isFirstMessageSent.value = true;
+              // Use setTimeout to ensure the DOM has been updated
+              setTimeout(() => setFullHeightAndScroll(), 100);
+            }
           }
         })
         .catch(error => {
@@ -374,19 +429,34 @@ onMounted(async () => {
       const savedHeight = localStorage.getItem("chatHeight");
       if (savedHeight) chatHeight.value = parseInt(savedHeight);
     }
+
+    // Add window resize listener
+    window.addEventListener("resize", handleWindowResize);
   }
   scrollToBottom();
   inputRef.value?.focus();
   nextTick(() => {
     updatePromptScrollButtons();
     promptBarRef.value?.addEventListener("scroll", updatePromptScrollButtons);
-    window.addEventListener("resize", updatePromptScrollButtons);
     // Initialize textarea resize
     if (inputRef.value) {
       resizeTextarea();
       inputRef.value.addEventListener("input", resizeTextarea);
     }
   });
+});
+
+// --- Clean up event listeners ---
+const cleanupEventListeners = () => {
+  window.removeEventListener("resize", handleWindowResize);
+  promptBarRef.value?.removeEventListener("scroll", updatePromptScrollButtons);
+  if (inputRef.value) {
+    inputRef.value.removeEventListener("input", resizeTextarea);
+  }
+};
+
+onBeforeUnmount(() => {
+  cleanupEventListeners();
 });
 
 // --- Watchers ---
