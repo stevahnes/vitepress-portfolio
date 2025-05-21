@@ -1,10 +1,41 @@
 import "dotenv/config";
-import { Langbase } from "langbase";
+import { Langbase, Tools } from "langbase";
 
 // Initialize Langbase with API key
 const langbase = new Langbase({
   apiKey: process.env.LANGBASE_API_KEY!,
 });
+
+// Define email tool for Langbase - follows the OpenAI Function Calling format
+const emailTool: Tools = {
+  type: "function", // Required for Langbase tools
+  function: {
+    name: "send_email",
+    description: "Send a message via email to Stevanus",
+    parameters: {
+      type: "object",
+      properties: {
+        subject: {
+          type: "string",
+          description: "Subject of the email",
+        },
+        content: {
+          type: "string",
+          description: "Message content for the email",
+        },
+        senderName: {
+          type: "string",
+          description: "Name of the person sending this message",
+        },
+        senderEmail: {
+          type: "string",
+          description: "Email address of the person sending this message",
+        },
+      },
+      required: ["subject", "content", "senderName", "senderEmail"],
+    },
+  },
+};
 
 // System prompts for the AI
 const SYSTEM_PROMPTS = {
@@ -109,7 +140,7 @@ async function main() {
     description: "The only avocado advocating for Steve",
     model: "openai:gpt-4o-mini",
     json: false,
-    tools: [],
+    tools: [emailTool],
     memory: [{ name: "advocado-memory" }],
     messages: [
       {
