@@ -983,12 +983,19 @@ watch(
   line-height: 1.5 !important;
 }
 
-:deep(.markdown-content p) {
-  margin-bottom: 0.5rem !important;
+/* Remove per-element margin-bottom for p, ul, ol. Use vertical rhythm spacing instead */
+:deep(.markdown-content p),
+:deep(.markdown-content ul),
+:deep(.markdown-content ol),
+:deep(.markdown-content pre),
+:deep(.markdown-content blockquote) {
+  margin: 0;
+  padding: 0;
 }
 
-:deep(.markdown-content p:last-child) {
-  margin-bottom: 0 !important;
+/* Apply spacing ONLY between sibling blocks, never stacking */
+:deep(.markdown-content > * + *) {
+  margin-top: 0.5rem;
 }
 
 :deep(.markdown-content strong) {
@@ -1002,13 +1009,11 @@ watch(
 :deep(.markdown-content ul) {
   list-style-type: disc !important;
   margin-left: 1.5rem !important;
-  margin-bottom: 0.5rem !important;
 }
 
 :deep(.markdown-content ol) {
   list-style-type: decimal !important;
   margin-left: 1.5rem !important;
-  margin-bottom: 0.5rem !important;
 }
 
 :deep(.markdown-content code) {
@@ -1033,7 +1038,6 @@ watch(
 :deep(.markdown-content blockquote) {
   border-left: 3px solid var(--blockquote-border-color) !important;
   padding-left: 1rem !important;
-  margin: 0 !important;
   font-style: italic !important;
 }
 
