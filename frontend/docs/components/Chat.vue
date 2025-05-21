@@ -980,42 +980,60 @@ watch(
 
 /* Markdown styling */
 :deep(.markdown-content) {
-  line-height: 1.5 !important;
+  line-height: 1.4 !important; /* slightly tighter for chat */
 }
 
-/* Remove per-element margin-bottom for p, ul, ol. Use vertical rhythm spacing instead */
+/* Remove margin/padding from paragraphs, lists, pre/code, blockquotes */
 :deep(.markdown-content p),
 :deep(.markdown-content ul),
 :deep(.markdown-content ol),
 :deep(.markdown-content pre),
 :deep(.markdown-content blockquote) {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-/* Apply spacing ONLY between sibling blocks, never stacking */
+/* Tight spacing between sibling blocks (paragraphs, lists, etc.) */
 :deep(.markdown-content > * + *) {
-  margin-top: 0.5rem;
+  margin-top: 0.4em !important; /* em units scale with font size */
 }
 
+/* Paragraphs that follow another paragraph (extra safe for nested structure) */
+:deep(.markdown-content p + p) {
+  margin-top: 0.4em !important;
+}
+
+/* Remove default margin/padding from list items and nested paragraphs */
+:deep(.markdown-content li),
+:deep(.markdown-content li p) {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Tighter left margin for lists for less indentation */
+:deep(.markdown-content ul),
+:deep(.markdown-content ol) {
+  margin-left: 1rem !important; /* less than default 1.5rem */
+  padding: 0 !important;
+}
+
+/* Standard list-style */
+:deep(.markdown-content ul) {
+  list-style-type: disc !important;
+}
+:deep(.markdown-content ol) {
+  list-style-type: decimal !important;
+}
+
+/* Strong/italic */
 :deep(.markdown-content strong) {
   font-weight: bold !important;
 }
-
 :deep(.markdown-content em) {
   font-style: italic !important;
 }
 
-:deep(.markdown-content ul) {
-  list-style-type: disc !important;
-  margin-left: 1.5rem !important;
-}
-
-:deep(.markdown-content ol) {
-  list-style-type: decimal !important;
-  margin-left: 1.5rem !important;
-}
-
+/* Inline code */
 :deep(.markdown-content code) {
   font-family: monospace !important;
   background-color: var(--code-bg-color) !important;
@@ -1023,6 +1041,7 @@ watch(
   border-radius: 0.25rem !important;
 }
 
+/* Code block */
 :deep(.markdown-content pre code) {
   display: block !important;
   padding: 0.75rem !important;
@@ -1030,15 +1049,18 @@ watch(
   overflow-x: auto !important;
 }
 
+/* Links */
 :deep(.markdown-content a) {
   color: var(--link-color) !important;
   text-decoration: underline !important;
 }
 
+/* Blockquote */
 :deep(.markdown-content blockquote) {
   border-left: 3px solid var(--blockquote-border-color) !important;
   padding-left: 1rem !important;
   font-style: italic !important;
+  margin: 0 !important;
 }
 
 /* Desktop: slim horizontal scrollbar for prompt bar */
