@@ -28,6 +28,7 @@ const promptBarRef = ref<HTMLDivElement | null>(null);
 const showLeftScroll = ref(false);
 const showRightScroll = ref(false);
 const isFirstMessageSent = ref(false); // Track if first message has been sent
+const isMobile = ref(false); // Track if the device is mobile
 
 // --- DOM Refs ---
 const inputRef = ref<HTMLTextAreaElement | null>(null);
@@ -87,31 +88,73 @@ const parseMarkdown = (content: string): string | Promise<string> => marked.pars
 
 const scrollToBottom = async (): Promise<void> => {
   await nextTick();
-  if (chatContainerRef.value) {
-    chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
-  }
+  if (!chatContainerRef.value) return;
+
+  // Use requestAnimationFrame for smoother scrolling
+  requestAnimationFrame(() => {
+    if (!chatContainerRef.value) return;
+
+    // Check if we're already at the bottom to avoid unnecessary scrolling
+    const isAtBottom =
+      chatContainerRef.value.scrollHeight - chatContainerRef.value.scrollTop <=
+      chatContainerRef.value.clientHeight + 50;
+
+    if (!isAtBottom) {
+      chatContainerRef.value.scrollTop = chatContainerRef.value.scrollHeight;
+    }
+  });
+};
+
+// Check if device is mobile
+const checkIfMobile = (): boolean => {
+  if (typeof window === "undefined") return false;
+  // Use both screen width and user agent for better detection
+  return (
+    window.innerWidth < 768 ||
+    window.matchMedia("(pointer: coarse)").matches ||
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  );
 };
 
 // Set the chat window to full height and scroll to it
 const setFullHeightAndScroll = async (): Promise<void> => {
   if (!isClient.value || !chatWindowRef.value) return;
 
-  // Calculate viewport height and set chat height
-  const viewportHeight = window.innerHeight;
-  const offsetTop = chatWindowRef.value.getBoundingClientRect().top + window.pageYOffset;
+  // Calculate viewport height considering virtual keyboards on mobile
+  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
 
-  // Set chat height to viewport height
-  chatHeight.value = viewportHeight;
+  // Set chat height to viewport height with a small buffer for mobile
+  chatHeight.value = isMobile.value ? viewportHeight - 20 : viewportHeight;
 
   // Save height to localStorage
   localStorage.setItem("chatHeight", chatHeight.value.toString());
 
-  // Scroll the window to position the chat at the top
-  await nextTick();
-  window.scrollTo({
-    top: offsetTop,
-    behavior: "smooth",
-  });
+  // For mobile devices, handle differently
+  if (isMobile.value) {
+    // Use requestAnimationFrame for smoother rendering
+    requestAnimationFrame(() => {
+      if (!chatWindowRef.value) return;
+      const offsetTop = chatWindowRef.value.getBoundingClientRect().top + window.pageYOffset;
+
+      window.scrollTo({
+        top: offsetTop,
+        behavior: "smooth",
+      });
+
+      // Additional scroll to bottom with a slight delay to ensure rendering
+      setTimeout(scrollToBottom, 150);
+    });
+  } else {
+    // Desktop behavior
+    await nextTick();
+    if (!chatWindowRef.value) return;
+    const offsetTop = chatWindowRef.value.getBoundingClientRect().top + window.pageYOffset;
+
+    window.scrollTo({
+      top: offsetTop,
+      behavior: "smooth",
+    });
+  }
 };
 
 const updatePromptScrollButtons = (): void => {
@@ -192,10 +235,28 @@ const sendMessage = async (): Promise<void> => {
     timestamp: Date.now(),
   });
 
+  // Within the sendMessage function, replace the first message handling with:
   // If this is the first actual message from the user, expand to full screen
   if (isFirstMessage && !isFirstMessageSent.value) {
     isFirstMessageSent.value = true;
-    setFullHeightAndScroll();
+
+    // Use setTimeout to ensure DOM is ready
+    setTimeout(async () => {
+      await setFullHeightAndScroll();
+
+      // For mobile, add another scroll check after keyboard appears/disappears
+      if (isMobile.value) {
+        window.addEventListener(
+          "resize",
+          function onResize() {
+            scrollToBottom();
+            // Remove this event listener after first firing
+            window.removeEventListener("resize", onResize);
+          },
+          { once: true },
+        );
+      }
+    }, 50);
   }
 
   let currentAssistantContent = "";
@@ -352,18 +413,70 @@ function setSuggestion(suggestion: string): void {
 
 // --- Window Resize Event Handler ---
 const handleWindowResize = () => {
+  // Check if device is mobile when window is resized
+  isMobile.value = checkIfMobile();
+
   // If we've sent the first message, update the height to fit the viewport
   if (isFirstMessageSent.value) {
     chatHeight.value = window.innerHeight;
     localStorage.setItem("chatHeight", chatHeight.value.toString());
+
+    // For mobile devices, trigger additional scrolling to ensure visibility
+    if (isMobile.value) {
+      setTimeout(() => {
+        scrollToBottom();
+
+        // If chat window exists, scroll to it
+        if (chatWindowRef.value) {
+          const offsetTop = chatWindowRef.value.getBoundingClientRect().top + window.pageYOffset;
+          window.scrollTo({
+            top: offsetTop,
+            behavior: "smooth",
+          });
+        }
+      }, 100);
+    }
   }
   updatePromptScrollButtons();
+};
+
+// Handle visibility change for mobile browsers
+const handleVisibilityChange = () => {
+  if (!document.hidden && isFirstMessageSent.value && isMobile.value) {
+    // Use requestAnimationFrame for smoother handling
+    requestAnimationFrame(() => {
+      if (!chatWindowRef.value) return;
+
+      // Get current orientation to handle orientation changes
+      const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+      const viewportHeight = window.visualViewport
+        ? window.visualViewport.height
+        : window.innerHeight;
+
+      // Adjust height based on orientation
+      chatHeight.value = isLandscape ? viewportHeight - 40 : viewportHeight - 20;
+      localStorage.setItem("chatHeight", chatHeight.value.toString());
+
+      const offsetTop = chatWindowRef.value.getBoundingClientRect().top + window.pageYOffset;
+      window.scrollTo({
+        top: offsetTop,
+        behavior: "smooth",
+      });
+
+      // Ensure messages are visible
+      setTimeout(scrollToBottom, 100);
+    });
+  }
 };
 
 // --- Initial Load ---
 onMounted(async () => {
   isClient.value = true;
   clientSideTheme.value = true;
+
+  // Check if device is mobile
+  isMobile.value = checkIfMobile();
+
   threadId.value = typeof localStorage !== "undefined" ? localStorage.getItem("threadId") : null;
   // Render chat UI immediately
   if (messages.value.length === 0) {
@@ -432,6 +545,27 @@ onMounted(async () => {
 
     // Add window resize listener
     window.addEventListener("resize", handleWindowResize);
+
+    // Add visibility change listener for mobile
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // For iOS Safari, add additional scroll event handling
+    if (isMobile.value && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      window.addEventListener("scroll", () => {
+        if (isFirstMessageSent.value) {
+          // Store the current scroll position in session storage
+          sessionStorage.setItem("chatScrollY", window.scrollY.toString());
+        }
+      });
+
+      // If we have a stored position, try to restore it
+      const storedScrollY = sessionStorage.getItem("chatScrollY");
+      if (storedScrollY && isFirstMessageSent.value) {
+        setTimeout(() => {
+          window.scrollTo(0, parseInt(storedScrollY));
+        }, 100);
+      }
+    }
   }
   scrollToBottom();
   inputRef.value?.focus();
@@ -449,9 +583,13 @@ onMounted(async () => {
 // --- Clean up event listeners ---
 const cleanupEventListeners = () => {
   window.removeEventListener("resize", handleWindowResize);
+  document.removeEventListener("visibilitychange", handleVisibilityChange);
   promptBarRef.value?.removeEventListener("scroll", updatePromptScrollButtons);
   if (inputRef.value) {
     inputRef.value.removeEventListener("input", resizeTextarea);
+  }
+  if (isMobile.value && /iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    window.removeEventListener("scroll", () => {});
   }
 };
 
