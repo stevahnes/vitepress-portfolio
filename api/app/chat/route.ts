@@ -1,30 +1,18 @@
 import { NextRequest } from "next/server";
-import { Langbase, RunOptionsStream, getToolsFromStream } from "langbase";
 import { Resend } from "resend";
+import { ChatService } from "../../lib/chat-service";
+import { EmailTool } from "../../lib/email-tool";
 
 // Initialize Resend client
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Initialize Langbase client
-const langbase = new Langbase({
-  apiKey: process.env.LANGBASE_API_KEY!,
-});
-
-/**
- * Create HTML email template based on stevanussatria.com color scheme
- * @param subject The email subject
- * @param content The email content/message
- * @param senderName Name of the person sending the message
- * @param senderEmail Email of the person sending the message
- * @returns Formatted HTML email template
- */
-const createEmailTemplate = (
+// Create HTML email template
+function createEmailTemplate(
   subject: string,
   content: string,
   senderName: string,
   senderEmail: string
-): string => {
-  // Format the current date
+): string {
   const currentDate = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -54,7 +42,7 @@ const createEmailTemplate = (
       padding: 20px;
     }
     .header {
-      background-color: #191970; /* Deep blue similar to stevanussatria.com */
+      background-color: #191970;
       padding: 20px;
       color: white;
       text-align: center;
@@ -96,10 +84,6 @@ const createEmailTemplate = (
       font-size: 14px;
       margin-bottom: 20px;
     }
-    h1 {
-      color: #333;
-      margin-top: 0;
-    }
     .message {
       background-color: #f9f9f9;
       padding: 15px;
@@ -131,84 +115,36 @@ const createEmailTemplate = (
 </body>
 </html>
   `;
-};
-
-// Define email tool for Langbase - follows the OpenAI Function Calling format
-const emailTool = {
-  type: "function", // Required for Langbase tools
-  function: {
-    name: "send_email",
-    description: "Send a message via email to Stevanus",
-    parameters: {
-      type: "object",
-      properties: {
-        subject: {
-          type: "string",
-          description: "Subject of the email",
-        },
-        content: {
-          type: "string",
-          description: "Message content for the email",
-        },
-        senderName: {
-          type: "string",
-          description: "Name of the person sending this message",
-        },
-        senderEmail: {
-          type: "string",
-          description: "Email address of the person sending this message",
-        },
-      },
-      required: ["subject", "content", "senderName", "senderEmail"],
-    },
-  },
-};
-
-// Define proper interfaces for type safety
-interface EmailParams {
-  subject: string;
-  content: string;
-  senderName: string;
-  senderEmail: string;
 }
 
-interface EmailResponse {
-  success: boolean;
-  data?: {
-    id?: string;
-    message: string;
-  };
-  error?: string;
-}
-
-// Handler function to send email
-const sendEmail = async ({
+// Email sending function
+async function handleEmailSend({
   subject,
   content,
   senderName,
   senderEmail,
-}: EmailParams): Promise<string> => {
+}: {
+  subject: string;
+  content: string;
+  senderName: string;
+  senderEmail: string;
+}): Promise<string> {
   try {
-    // Create HTML email using template
     const htmlContent = createEmailTemplate(
       subject,
       content,
       senderName,
       senderEmail
     );
-
     const { data, error } = await resend.emails.send({
       from: "Advocado <advocado@stevanussatria.com>",
-      to: ["me@stevanussatria.com"], // Hardcoded recipient
+      to: ["me@stevanussatria.com"],
       subject: subject,
       html: htmlContent,
     });
 
     if (error) {
-      return JSON.stringify({
-        success: false,
-        error: error.message,
-      });
+      return JSON.stringify({ success: false, error: error.message });
     }
 
     return JSON.stringify({
@@ -225,113 +161,27 @@ const sendEmail = async ({
         error instanceof Error ? error.message : "An unknown error occurred",
     });
   }
-};
+}
 
-// Map of tools available to the agent
-const tools: {
-  [key: string]: ({
-    subject,
-    content,
-    senderName,
-    senderEmail,
-  }: EmailParams) => Promise<string>;
-} = {
-  send_email: sendEmail,
-};
+// Initialize chat service with email tool
+const chatService = new ChatService(process.env.OPENAI_API_KEY!, [
+  new EmailTool(handleEmailSend),
+]);
 
+// Chat endpoint handler
 export async function POST(req: NextRequest) {
   const options = await req.json();
 
-  // First call to get initial response and potential tool calls
-  const { stream: initialStream, threadId } = await langbase.pipes.run({
-    ...options,
-    name: "advocado",
-    tools: [emailTool], // Add the email tool to the available tools
-    toolCallBehavior: "auto", // Allow automatic tool calling
-    stream: true, // Ensure streaming is enabled
+  const { stream, threadId } = await chatService.chat({
+    messages: options.messages,
+    threadId: options.threadId,
+    stream: true,
   });
 
-  // Create a TransformStream to process the response
-  const { readable, writable } = new TransformStream();
-  const writer = writable.getWriter();
-
-  // Clone the stream for tool handling and response
-  const [streamForToolCalls, streamForResponse] = initialStream.tee();
-
-  // Process tool calls
-  (async () => {
-    try {
-      // Extract tool calls from the stream
-      const toolCalls = await getToolsFromStream(streamForToolCalls);
-
-      // If there are tool calls, handle them
-      if (toolCalls.length > 0) {
-        const toolMessages = [];
-
-        // Process each tool call
-        for (const toolCall of toolCalls) {
-          const toolName = toolCall.function.name;
-          const toolParameters = JSON.parse(toolCall.function.arguments);
-          const toolFunction = tools[toolName];
-
-          if (toolFunction) {
-            const toolResult = await toolFunction(toolParameters);
-
-            // Add the tool response message
-            toolMessages.push({
-              tool_call_id: toolCall.id,
-              role: "tool",
-              name: toolName,
-              content: toolResult,
-            });
-          }
-        }
-
-        // Get the final response after tool calls
-        const { stream: finalStream } = await langbase.pipes.run({
-          messages: toolMessages,
-          name: "advocado",
-          threadId: threadId,
-          stream: true,
-        } as RunOptionsStream);
-
-        // Forward the final stream to the client
-        const reader = finalStream.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          await writer.write(value);
-        }
-      }
-
-      // Complete the stream
-      await writer.close();
-    } catch (error) {
-      console.error("Error processing tool calls:", error);
-      await writer.abort(error);
-    }
-  })();
-
-  // Forward the initial response stream if no tool calls or until tool calls are processed
-  (async () => {
-    try {
-      const reader = streamForResponse.getReader();
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        await writer.write(value);
-      }
-    } catch (error) {
-      console.error("Error forwarding response stream:", error);
-      // No need to abort here as it will be handled by the other async function
-    }
-  })();
-
-  return new Response(readable, {
+  return new Response(stream, {
     status: 200,
     headers: {
-      "lb-thread-id": threadId ?? "",
+      "lb-thread-id": threadId,
     },
   });
 }

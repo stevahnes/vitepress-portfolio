@@ -1,9 +1,7 @@
-import { Langbase } from "langbase";
 import { NextRequest, NextResponse } from "next/server";
+import { ChatService } from "../../../lib/chat-service";
 
-const langbase = new Langbase({
-  apiKey: process.env.LANGBASE_API_KEY!,
-});
+const chatService = new ChatService(process.env.OPENAI_API_KEY!);
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,8 +15,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get thread messages using Langbase SDK
-    const messages = await langbase.threads.messages.list({ threadId });
+    // Get thread messages using ChatService
+    const messages = await chatService.getThreadMessages(threadId);
 
     if (!messages) {
       return NextResponse.json({ error: "Thread not found" }, { status: 404 });

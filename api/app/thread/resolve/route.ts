@@ -1,9 +1,7 @@
-import { Langbase } from "langbase";
 import { NextRequest, NextResponse } from "next/server";
+import { ChatService } from "../../../lib/chat-service";
 
-const langbase = new Langbase({
-  apiKey: process.env.LANGBASE_API_KEY!,
-});
+const chatService = new ChatService(process.env.OPENAI_API_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,13 +22,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Resolve thread with feedback metadata
-    const result = await langbase.threads.update({
-      threadId,
-      metadata: {
-        status: "resolved",
-        feedback: feedback,
-      },
+    // Update thread with feedback using ChatService
+    const result = await chatService.updateThread(threadId, {
+      status: "resolved",
+      feedback: feedback,
     });
 
     if (!result) {
