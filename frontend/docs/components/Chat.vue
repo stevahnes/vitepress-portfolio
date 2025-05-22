@@ -30,6 +30,26 @@ const showRightScroll = ref(false);
 const isFirstMessageSent = ref(false); // Track if first message has been sent
 const isMobile = ref(false); // Track if the device is mobile
 
+// Add witty error messages
+const wittyErrorMessages = [
+  "Oh my, looks like something is wrong with Advocado 🥑",
+  "Oops! Advocado seems to have taken a little nap 😴",
+  "Looks like Advocado is having a bad hair day! 🌪️",
+  "Advocado is feeling a bit under the weather today 🤒",
+  "Advocado is currently doing some avocado yoga to recover 🧘‍♂️",
+  "Looks like Advocado spilled its guacamole! 🥑💦",
+  "Advocado is currently on a quick coffee break ☕",
+  "Looks like Advocado is having a moment... 🤔",
+  "Advocado is practicing its avocado meditation 🧘‍♀️",
+  "Looks like Advocado is doing some emergency guac maintenance! 🛠️",
+];
+
+// Function to get random witty message
+const getRandomWittyMessage = (): string => {
+  const randomIndex = Math.floor(Math.random() * wittyErrorMessages.length);
+  return wittyErrorMessages[randomIndex];
+};
+
 // --- DOM Refs ---
 const inputRef = ref<HTMLTextAreaElement | null>(null);
 const chatContainerRef = ref<HTMLDivElement | null>(null);
@@ -229,11 +249,15 @@ const sendMessage = async (): Promise<void> => {
     messages.value[0]?.role === "assistant" &&
     messages.value[0]?.content.includes("Hi! What would you like to learn about Steve today?");
 
-  messages.value.push({
-    role: "user",
+  // Store user message temporarily
+  const userMessage = {
+    role: "user" as Role,
     content: userInput.value,
     timestamp: Date.now(),
-  });
+  };
+
+  // Add user message to chat
+  messages.value.push(userMessage);
 
   // Within the sendMessage function, replace the first message handling with:
   // If this is the first actual message from the user, expand to full screen
@@ -282,6 +306,11 @@ const sendMessage = async (): Promise<void> => {
       body: JSON.stringify(requestBody),
     });
 
+    // Handle non-200 responses
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
+    }
+
     if (!response.body) throw new Error("No response body");
 
     const threadIdHeader = response.headers.get("lb-thread-id");
@@ -328,15 +357,22 @@ const sendMessage = async (): Promise<void> => {
     }
   } catch (error) {
     console.error("Error during streaming:", error);
+
+    // Add assistant message with witty error if not already added
     if (!assistantMessageAdded) {
       messages.value.push({
         role: "assistant",
-        content: "[Error receiving response]",
+        content: getRandomWittyMessage(),
         timestamp: Date.now(),
       });
     } else if (currentAssistantContent.trim() === "") {
-      messages.value[messages.value.length - 1].content = "[Error receiving response]";
+      // If assistant message was added but no content was received
+      messages.value[messages.value.length - 1].content = getRandomWittyMessage();
     }
+
+    // Ensure the message is visible
+    messages.value = [...messages.value];
+    await scrollToBottom();
   } finally {
     loading.value = false;
     userInput.value = "";
@@ -980,7 +1016,8 @@ watch(
 
 /* Markdown styling */
 :deep(.markdown-content) {
-  line-height: 1.4 !important; /* slightly tighter for chat */
+  line-height: 1.4 !important;
+  /* slightly tighter for chat */
 }
 
 /* Remove margin/padding from paragraphs, lists, pre/code, blockquotes */
@@ -995,7 +1032,8 @@ watch(
 
 /* Tight spacing between sibling blocks (paragraphs, lists, etc.) */
 :deep(.markdown-content > * + *) {
-  margin-top: 0.4em !important; /* em units scale with font size */
+  margin-top: 0.4em !important;
+  /* em units scale with font size */
 }
 
 /* Paragraphs that follow another paragraph (extra safe for nested structure) */
@@ -1013,7 +1051,8 @@ watch(
 /* Tighter left margin for lists for less indentation */
 :deep(.markdown-content ul),
 :deep(.markdown-content ol) {
-  margin-left: 1rem !important; /* less than default 1.5rem */
+  margin-left: 1rem !important;
+  /* less than default 1.5rem */
   padding: 0 !important;
 }
 
@@ -1021,6 +1060,7 @@ watch(
 :deep(.markdown-content ul) {
   list-style-type: disc !important;
 }
+
 :deep(.markdown-content ol) {
   list-style-type: decimal !important;
 }
@@ -1029,6 +1069,7 @@ watch(
 :deep(.markdown-content strong) {
   font-weight: bold !important;
 }
+
 :deep(.markdown-content em) {
   font-style: italic !important;
 }
