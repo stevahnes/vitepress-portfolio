@@ -32,16 +32,16 @@ const isMobile = ref(false); // Track if the device is mobile
 
 // Add witty error messages
 const wittyErrorMessages = [
-  "Oh my, looks like something is wrong with Advocado 🥑",
-  "Oops! Advocado seems to have taken a little nap 😴",
-  "Looks like Advocado is having a bad hair day! 🌪️",
-  "Advocado is feeling a bit under the weather today 🤒",
-  "Advocado is currently doing some avocado yoga to recover 🧘‍♂️",
-  "Looks like Advocado spilled its guacamole! 🥑💦",
-  "Advocado is currently on a quick coffee break ☕",
-  "Looks like Advocado is having a moment... 🤔",
-  "Advocado is practicing its avocado meditation 🧘‍♀️",
-  "Looks like Advocado is doing some emergency guac maintenance! 🛠️",
+  "Oh my, looks like something is wrong with Advocado 🥑. You can [read about Steve here](/about) or try again later!",
+  "Oops! Advocado seems to have taken a little nap 😴. While you wait, why not [learn about Steve](/about)? Or try again in a moment!",
+  "Looks like Advocado is having a bad hair day! 🌪️ Try again soon, or [check out Steve's profile](/about)!",
+  "Advocado is feeling a bit under the weather today 🤒. Please try again later, or [read about Steve](/about)!",
+  "Advocado is currently doing some avocado yoga to recover 🧘‍♂️. [Browse Steve's info](/about) or try again in a bit!",
+  "Looks like Advocado spilled its guacamole! 🥑💦 While we clean up, [learn about Steve](/about) or try again later!",
+  "Advocado is currently on a quick coffee break ☕. [Read Steve's story](/about) or try again in a moment!",
+  "Looks like Advocado is having a moment... 🤔 Try again soon, or [discover more about Steve](/about)!",
+  "Advocado is practicing its avocado meditation 🧘‍♀️. Please try again later, or [explore Steve's background](/about)!",
+  "Looks like Advocado is doing some emergency guac maintenance! 🛠️ [Check out Steve's profile](/about) or try again in a bit!",
 ];
 
 // Function to get random witty message
