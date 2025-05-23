@@ -3,6 +3,12 @@ layout: home
 
 features:
   - icon:
+      src: /llm-judge.png
+    title: docs-eval (Private Repo)
+    details: A simple LLM-as-a-judge implementation for documentation agent output, hosted on Vercel
+    link: https://github.com/stevahnes/docs-eval
+    target: _blank
+  - icon:
       src: /advocado.webp
     title: Advocado
     details: My biggest advocate, made possible by Langbase and Vercel
