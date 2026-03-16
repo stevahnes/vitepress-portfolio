@@ -259,3 +259,218 @@ describe("ShaderBackground", () => {
     expect(wrapper.find(".shader-picker").classes()).not.toContain("open");
   });
 });
+
+// ─── WebGL lifecycle tests ────────────────────────────────────────────────────
+// Mock canvas.getContext("webgl") to exercise shader compilation, switching,
+// observer setup, and cleanup logic.
+
+function createMockGLContext() {
+  const programs: object[] = [];
+  const gl = {
+    VERTEX_SHADER: 35633,
+    FRAGMENT_SHADER: 35632,
+    COMPILE_STATUS: 35713,
+    LINK_STATUS: 35714,
+    ARRAY_BUFFER: 34962,
+    STATIC_DRAW: 35044,
+    FLOAT: 5126,
+    TRIANGLE_STRIP: 5,
+    createShader: vi.fn(() => ({})),
+    shaderSource: vi.fn(),
+    compileShader: vi.fn(),
+    getShaderParameter: vi.fn(() => true),
+    getShaderInfoLog: vi.fn(() => ""),
+    deleteShader: vi.fn(),
+    createProgram: vi.fn(() => {
+      const prog = {};
+      programs.push(prog);
+      return prog;
+    }),
+    attachShader: vi.fn(),
+    linkProgram: vi.fn(),
+    getProgramParameter: vi.fn(() => true),
+    getProgramInfoLog: vi.fn(() => ""),
+    useProgram: vi.fn(),
+    getAttribLocation: vi.fn(() => 0),
+    getUniformLocation: vi.fn(() => ({})),
+    enableVertexAttribArray: vi.fn(),
+    vertexAttribPointer: vi.fn(),
+    createBuffer: vi.fn(() => ({})),
+    bindBuffer: vi.fn(),
+    bufferData: vi.fn(),
+    uniform1f: vi.fn(),
+    uniform2f: vi.fn(),
+    uniform3f: vi.fn(),
+    viewport: vi.fn(),
+    drawArrays: vi.fn(),
+    clearColor: vi.fn(),
+    clear: vi.fn(),
+  };
+  return { gl, programs };
+}
+
+describe("ShaderBackground (WebGL lifecycle)", () => {
+  let wrapper: VueWrapper;
+  let mockGL: ReturnType<typeof createMockGLContext>["gl"];
+  let origGetContext: typeof HTMLCanvasElement.prototype.getContext;
+  let idleCallbacks: ((deadline: IdleDeadline) => void)[];
+  let origRequestIdleCallback: typeof window.requestIdleCallback;
+  let origCancelAnimationFrame: typeof window.cancelAnimationFrame;
+  let cancelSpy: ReturnType<typeof vi.fn>;
+
+  beforeEach(() => {
+    sessionStorage.clear();
+    const { gl } = createMockGLContext();
+    mockGL = gl;
+
+    origGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = vi.fn(function (
+      this: HTMLCanvasElement,
+      type: string,
+    ) {
+      if (type === "webgl") return mockGL as unknown as WebGLRenderingContext;
+      return origGetContext.call(this, type as "2d");
+    }) as typeof HTMLCanvasElement.prototype.getContext;
+
+    idleCallbacks = [];
+    origRequestIdleCallback = window.requestIdleCallback;
+    window.requestIdleCallback = vi.fn((cb: IdleRequestCallback) => {
+      idleCallbacks.push(cb as (deadline: IdleDeadline) => void);
+      return idleCallbacks.length;
+    }) as unknown as typeof window.requestIdleCallback;
+
+    cancelSpy = vi.fn();
+    origCancelAnimationFrame = window.cancelAnimationFrame;
+    window.cancelAnimationFrame = cancelSpy as unknown as typeof window.cancelAnimationFrame;
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+    HTMLCanvasElement.prototype.getContext = origGetContext;
+    window.requestIdleCallback = origRequestIdleCallback;
+    window.cancelAnimationFrame = origCancelAnimationFrame;
+    sessionStorage.clear();
+  });
+
+  function fireIdleCallbacks() {
+    for (const cb of idleCallbacks) {
+      cb({ timeRemaining: () => 50, didTimeout: false });
+    }
+    idleCallbacks = [];
+  }
+
+  it("initializes WebGL and compiles a shader program on mount", async () => {
+    wrapper = mount(ShaderBackground);
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    // Fire requestIdleCallback to trigger initGL
+    fireIdleCallbacks();
+    await flushPromises();
+
+    expect(mockGL.createProgram).toHaveBeenCalled();
+    expect(mockGL.useProgram).toHaveBeenCalled();
+    expect(mockGL.linkProgram).toHaveBeenCalled();
+  });
+
+  it("pre-compiles remaining shaders during idle time", async () => {
+    wrapper = mount(ShaderBackground);
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    // First idle callback triggers initGL which calls precompileOthers
+    fireIdleCallbacks();
+    await flushPromises();
+
+    // precompileOthers registers its own idle callback
+    fireIdleCallbacks();
+    await flushPromises();
+
+    // 1 initial + 4 other shaders = at least 5 programs created
+    expect(mockGL.createProgram.mock.calls.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("sets up ResizeObserver on the canvas", async () => {
+    const observeSpy = vi.fn();
+    const disconnectSpy = vi.fn();
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        observe = observeSpy;
+        disconnect = disconnectSpy;
+        unobserve = vi.fn();
+      },
+    );
+
+    wrapper = mount(ShaderBackground);
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+    fireIdleCallbacks();
+    await flushPromises();
+
+    expect(observeSpy).toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it("cancels animation frame on unmount", async () => {
+    wrapper = mount(ShaderBackground);
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+    fireIdleCallbacks();
+    await flushPromises();
+
+    wrapper.unmount();
+    expect(cancelSpy).toHaveBeenCalled();
+
+    // Remount to satisfy afterEach
+    wrapper = mount(ShaderBackground);
+  });
+
+  it("switches shader via switchShader event when GL is available", async () => {
+    wrapper = mount(ShaderBackground);
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+    fireIdleCallbacks();
+    await flushPromises();
+
+    mockGL.useProgram.mockClear();
+    window.dispatchEvent(new CustomEvent("switchShader", { detail: { id: "topology" } }));
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    expect(mockGL.useProgram).toHaveBeenCalled();
+  });
+
+  it("clicking a picker option switches the shader when GL is available", async () => {
+    wrapper = mount(ShaderBackground);
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+    fireIdleCallbacks();
+    await flushPromises();
+
+    await openPicker(wrapper);
+    mockGL.useProgram.mockClear();
+    const options = wrapper.findAll(".picker-option");
+    // Click a non-active option
+    const nonActive = options.find(o => !o.classes().includes("active"));
+    if (nonActive) {
+      await nonActive.trigger("click");
+      await flushPromises();
+      expect(mockGL.useProgram).toHaveBeenCalled();
+    }
+  });
+
+  it("updates sessionStorage when shader is switched", async () => {
+    wrapper = mount(ShaderBackground);
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+    fireIdleCallbacks();
+    await flushPromises();
+
+    window.dispatchEvent(new CustomEvent("switchShader", { detail: { id: "keys" } }));
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    expect(sessionStorage.getItem("activeShader")).toBe("keys");
+  });
+});

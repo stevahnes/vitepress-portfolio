@@ -363,4 +363,271 @@ describe("Chat", () => {
 
     expect(wrapper.text()).toContain("Something went wrong");
   });
+
+  // ── Streaming response ──────────────────────────────────────────────────────
+
+  it("accumulates streamed content into the assistant message", async () => {
+    const encoder = new TextEncoder();
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: new ReadableStream({
+        start(ctrl) {
+          ctrl.enqueue(encoder.encode('0:"Hello "\n'));
+          ctrl.enqueue(encoder.encode('0:"world"\n'));
+          ctrl.close();
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    await wrapper.find("textarea").setValue("Hi");
+    await wrapper.find("textarea").trigger("keydown", { key: "Enter", shiftKey: false });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Hello world");
+  });
+
+  it("handles null response.body as an error", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, body: null }));
+
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    await wrapper.find("textarea").setValue("Hi");
+    await wrapper.find("textarea").trigger("keydown", { key: "Enter", shiftKey: false });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Something went wrong");
+  });
+
+  // ── Retry ───────────────────────────────────────────────────────────────────
+
+  it("shows retry button after a failed message and retries on click", async () => {
+    let callCount = 0;
+    const encoder = new TextEncoder();
+    const mockFetch = vi.fn().mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return Promise.reject(new Error("Network failure"));
+      }
+      return Promise.resolve({
+        ok: true,
+        body: new ReadableStream({
+          start(ctrl) {
+            ctrl.enqueue(encoder.encode('0:"Retry success"\n'));
+            ctrl.close();
+          },
+        }),
+      });
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    await wrapper.find("textarea").setValue("Hi");
+    await wrapper.find("textarea").trigger("keydown", { key: "Enter", shiftKey: false });
+    await flushPromises();
+
+    expect(wrapper.text()).toContain("Something went wrong");
+    const retryBtn = wrapper.find(".retry-btn");
+    expect(retryBtn.exists()).toBe(true);
+
+    await retryBtn.trigger("click");
+    await flushPromises();
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  // ── Copy ────────────────────────────────────────────────────────────────────
+
+  it("copies assistant message content to clipboard", async () => {
+    const writeTextMock = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText: writeTextMock },
+      configurable: true,
+    });
+
+    vi.useFakeTimers();
+
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    const copyBtns = wrapper.findAll('[aria-label="Copy message"]');
+    expect(copyBtns.length).toBeGreaterThan(0);
+
+    await copyBtns[0].trigger("click");
+    await flushPromises();
+
+    expect(writeTextMock).toHaveBeenCalled();
+    expect(wrapper.find('[aria-label="Copied"]').exists()).toBe(true);
+
+    vi.advanceTimersByTime(2000);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.find('[aria-label="Copied"]').exists()).toBe(false);
+    vi.useRealTimers();
+  });
+
+  // ── Reset ───────────────────────────────────────────────────────────────────
+
+  it("resets chat to initial greeting when new conversation is clicked", async () => {
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.text()).toContain("Previous answer");
+
+    const resetBtn = wrapper.find('[aria-label="New conversation"]');
+    expect(resetBtn.exists()).toBe(true);
+    await resetBtn.trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    // resetChat restores a single initial greeting and returns to compact mode
+    const stored = JSON.parse(sessionStorage.getItem("chatMessages") ?? "[]") as {
+      content: string;
+    }[];
+    expect(stored).toHaveLength(1);
+    expect(stored[0].content).toContain("Hi!");
+    expect(localStorage.getItem("chatFullHeight")).toBeNull();
+  });
+
+  // ── Full height toggle ──────────────────────────────────────────────────────
+
+  it("toggles full height mode and persists to localStorage", async () => {
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    const fullScreenBtn = wrapper.find('[aria-label="Toggle full screen"]');
+    expect(fullScreenBtn.exists()).toBe(true);
+
+    await fullScreenBtn.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(localStorage.getItem("chatFullHeight")).toBe("true");
+
+    await fullScreenBtn.trigger("click");
+    await wrapper.vm.$nextTick();
+    expect(localStorage.getItem("chatFullHeight")).toBe("false");
+  });
+
+  // ── autoSend via activateChat ───────────────────────────────────────────────
+
+  it("auto-sends message when activateChat fires with autoSend: true", async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: new ReadableStream({
+        start(ctrl) {
+          ctrl.close();
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    wrapper = mount(Chat);
+    await flushPromises();
+
+    window.dispatchEvent(
+      new CustomEvent("activateChat", {
+        detail: { message: "Auto question", autoSend: true },
+      }),
+    );
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+    await flushPromises();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/chat"),
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
+  // ── Enter key submits in expanded mode ──────────────────────────────────────
+
+  it("sends message via Enter in expanded mode textarea", async () => {
+    const encoder = new TextEncoder();
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: new ReadableStream({
+        start(ctrl) {
+          ctrl.enqueue(encoder.encode('0:"Response"\n'));
+          ctrl.close();
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    const textareas = wrapper.findAll("textarea");
+    const expandedTextarea = textareas[textareas.length - 1];
+    await expandedTextarea.setValue("Test question");
+    await expandedTextarea.trigger("keydown", { key: "Enter", shiftKey: false });
+    await flushPromises();
+
+    expect(mockFetch).toHaveBeenCalled();
+  });
+
+  // ── Loading indicator visibility ────────────────────────────────────────────
+
+  it("clears loading state after streaming completes", async () => {
+    const encoder = new TextEncoder();
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      body: new ReadableStream({
+        start(ctrl) {
+          ctrl.enqueue(encoder.encode('0:"Done"\n'));
+          ctrl.close();
+        },
+      }),
+    });
+    vi.stubGlobal("fetch", mockFetch);
+
+    seedExpandedSession();
+    wrapper = mount(Chat);
+    await flushPromises();
+    await wrapper.find(".chat-fab").trigger("click");
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    await wrapper.find("textarea").setValue("Hi");
+    await wrapper.find("textarea").trigger("keydown", { key: "Enter", shiftKey: false });
+    await flushPromises();
+
+    // After streaming completes, the send button should not show spinner
+    const sendBtn = wrapper.find('[aria-label="Send message"]');
+    expect(sendBtn.find(".animate-spin").exists()).toBe(false);
+  });
 });
