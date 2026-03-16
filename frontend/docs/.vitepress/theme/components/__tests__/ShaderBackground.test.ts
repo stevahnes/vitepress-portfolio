@@ -338,7 +338,7 @@ describe("ShaderBackground (WebGL lifecycle)", () => {
 
     cancelSpy = vi.fn();
     origCancelAnimationFrame = window.cancelAnimationFrame;
-    window.cancelAnimationFrame = cancelSpy;
+    window.cancelAnimationFrame = cancelSpy as unknown as typeof window.cancelAnimationFrame;
   });
 
   afterEach(() => {
