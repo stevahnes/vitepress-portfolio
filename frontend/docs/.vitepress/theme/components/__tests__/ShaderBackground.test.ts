@@ -324,7 +324,10 @@ describe("ShaderBackground (WebGL lifecycle)", () => {
     mockGL = gl;
 
     origGetContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = vi.fn(function (this: HTMLCanvasElement, type: string) {
+    HTMLCanvasElement.prototype.getContext = vi.fn(function (
+      this: HTMLCanvasElement,
+      type: string,
+    ) {
       if (type === "webgl") return mockGL as unknown as WebGLRenderingContext;
       return origGetContext.call(this, type as "2d");
     }) as typeof HTMLCanvasElement.prototype.getContext;

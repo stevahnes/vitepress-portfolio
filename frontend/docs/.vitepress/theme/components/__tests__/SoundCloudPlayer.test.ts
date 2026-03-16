@@ -24,7 +24,9 @@ function createMockWidget() {
     seekTo: vi.fn(),
     isPaused: vi.fn((cb: (paused: boolean) => void) => cb(true)),
     getCurrentSound: vi.fn(
-      (cb: (sound: { title: string; duration: number; user: { username: string } } | null) => void) => {
+      (
+        cb: (sound: { title: string; duration: number; user: { username: string } } | null) => void,
+      ) => {
         cb({ title: "Test Track", duration: 180000, user: { username: "TestArtist" } });
       },
     ),

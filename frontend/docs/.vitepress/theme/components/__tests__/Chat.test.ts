@@ -396,10 +396,7 @@ describe("Chat", () => {
   });
 
   it("handles null response.body as an error", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockResolvedValue({ ok: true, body: null }),
-    );
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, body: null }));
 
     seedExpandedSession();
     wrapper = mount(Chat);
@@ -511,7 +508,9 @@ describe("Chat", () => {
     await wrapper.vm.$nextTick();
 
     // resetChat restores a single initial greeting and returns to compact mode
-    const stored = JSON.parse(sessionStorage.getItem("chatMessages") ?? "[]") as { content: string }[];
+    const stored = JSON.parse(sessionStorage.getItem("chatMessages") ?? "[]") as {
+      content: string;
+    }[];
     expect(stored).toHaveLength(1);
     expect(stored[0].content).toContain("Hi!");
     expect(localStorage.getItem("chatFullHeight")).toBeNull();
