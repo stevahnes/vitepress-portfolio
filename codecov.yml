@@ -2,10 +2,10 @@ coverage:
   status:
     project:
       default:
-        target: auto
+        target: 80%
         threshold: 2%
       frontend:
-        target: auto
+        target: 80%
         flags:
           - frontend
     patch:
