@@ -51,8 +51,8 @@
     "@vercel/speed-insights": "^2.0.0",
     "@vue-leaflet/vue-leaflet": "^0.10.1",
     "giscus": "^1.6.0",
-    "jspdf": "^4.0.0",
+    "jspdf": "^4.2.1",
     "leaflet": "^1.9.4",
-    "marked": "^17.0.4"
+    "marked": "^17.0.5"
   }
 }
