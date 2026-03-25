@@ -243,6 +243,8 @@ const flightData: FlightRecord[] = [
   // 2026 flights
   ["2026-02-14", "19:30:00", "SIN", "CGK", "GA837", "GA"],
   ["2026-02-19", "18:55:00", "CGK", "SIN", "GA822", "GA"],
+  ["2026-03-21", "09:30:00", "SIN", "CGK", "TR276", "TR"],
+  ["2026-03-23", "20:10:00", "CGK", "SIN", "TR279", "TR"],
 ].map(createFlight);
 </script>
 
