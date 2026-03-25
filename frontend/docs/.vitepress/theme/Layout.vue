@@ -7,6 +7,7 @@ const FloatingMusicPlayer = defineAsyncComponent(() => import("./components/Soun
 const UnifiedChat = defineAsyncComponent(() => import("./components/Chat.vue"));
 const ShaderBackground = defineAsyncComponent(() => import("./components/ShaderBackground.vue"));
 const Console = defineAsyncComponent(() => import("./components/Console.vue"));
+const GlitchHint = defineAsyncComponent(() => import("./components/GlitchHint.vue"));
 
 const { page } = useData();
 const isHome = computed(() => page.value.relativePath === "index.md");
@@ -23,6 +24,7 @@ const isHome = computed(() => page.value.relativePath === "index.md");
       />
       <UnifiedChat />
       <Console />
+      <GlitchHint />
     </template>
   </DefaultTheme.Layout>
 </template>

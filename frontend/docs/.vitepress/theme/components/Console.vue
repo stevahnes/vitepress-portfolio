@@ -104,6 +104,7 @@ const bootTerminal = async () => {
 
 const open = async () => {
   if (isOpen.value) return;
+  window.dispatchEvent(new CustomEvent("terminalOpen"));
   // Centre float window on first open (or if still at default 0,0)
   if (dockPosition.value === "float" && floatX.value === 0 && floatY.value === 0) {
     floatX.value = Math.round((window.innerWidth - floatW.value) / 2);
@@ -116,6 +117,7 @@ const open = async () => {
 const close = () => {
   isOpen.value = false;
   bootPhase.value = 0;
+  window.dispatchEvent(new CustomEvent("terminalClose"));
 };
 
 // Cycle: bottom → right → float → bottom
