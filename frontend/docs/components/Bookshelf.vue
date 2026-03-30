@@ -49,7 +49,8 @@ const tc = (dark: string, light: string) => (clientSideTheme.value && isDark.val
 const cssVars = computed(() => ({
   "--bs-bg": "var(--glass-bg)",
   "--bs-bg-strong": "var(--glass-bg-strong)",
-  "--bs-border": clientSideTheme.value && !isDark.value ? "rgba(0, 102, 178, 0.20)" : "var(--glass-border)",
+  "--bs-border":
+    clientSideTheme.value && !isDark.value ? "rgba(0, 102, 178, 0.20)" : "var(--glass-border)",
   "--bs-text-primary": tc("#e8f0f8", "#1c2b38"),
   "--bs-text-secondary": tc("rgba(255, 255, 255, 0.65)", "rgba(20, 30, 40, 0.7)"),
   "--bs-mono-text": tc("rgba(227, 241, 255, 0.92)", "rgba(30, 50, 70, 0.92)"),
@@ -130,13 +131,21 @@ function statusLabel(status: MediaItem["status"]) {
     <header class="bookshelf-header">
       <p class="eyebrow">Steve's Library</p>
       <h2 class="title">Bookshelf</h2>
-      <p class="subtitle">What I am reading, listening to, and applying to product craft.</p>
+      <p class="subtitle">
+        What I am reading and listening to for self improvement or just pure entertainment.
+      </p>
     </header>
 
     <div class="filter-row" aria-label="Media filters">
       <template v-if="isMounted">
-        <button v-for="filter in filterOptions" :key="filter.id" class="filter-button"
-          :class="{ active: activeFilter === filter.id }" type="button" @click="setFilter(filter.id)">
+        <button
+          v-for="filter in filterOptions"
+          :key="filter.id"
+          class="filter-button"
+          :class="{ active: activeFilter === filter.id }"
+          type="button"
+          @click="setFilter(filter.id)"
+        >
           {{ filter.label }}
         </button>
       </template>
@@ -147,18 +156,29 @@ function statusLabel(status: MediaItem["status"]) {
 
     <div class="sort-row" aria-label="Sort books">
       <span class="sort-label">Sort by:</span>
-      <button v-for="sort in sortOptions" :key="sort.id" class="sort-button" :class="{ active: activeSort === sort.id }"
-        type="button" @click="setSort(sort.id)">
+      <button
+        v-for="sort in sortOptions"
+        :key="sort.id"
+        class="sort-button"
+        :class="{ active: activeSort === sort.id }"
+        type="button"
+        @click="setSort(sort.id)"
+      >
         {{ sort.label }}
       </button>
     </div>
 
     <div v-if="filteredItems.length > 0" class="bento-grid">
-      <article v-for="item in filteredItems" :key="item.id" class="media-card" :class="[
-        `type-${item.type}`,
-        `status-${item.status}`,
-        { 'is-featured': item.status === 'consuming' },
-      ]">
+      <article
+        v-for="item in filteredItems"
+        :key="item.id"
+        class="media-card"
+        :class="[
+          `type-${item.type}`,
+          `status-${item.status}`,
+          { 'is-featured': item.status === 'consuming' },
+        ]"
+      >
         <div class="card-top">
           <span class="type-tag">{{ typeLabel(item.type) }}</span>
           <span class="status-tag">{{ statusLabel(item.status) }}</span>
