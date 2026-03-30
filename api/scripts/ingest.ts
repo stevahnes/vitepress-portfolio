@@ -12,6 +12,7 @@ const SUMMARIZE_FILES = [
   "skyline.md",
   "milestones.md",
   "recommendations.md",
+  "bookshelf.md",
 ];
 
 function stripNoise(content: string): string {
