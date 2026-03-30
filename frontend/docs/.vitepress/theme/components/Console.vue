@@ -172,7 +172,7 @@ const GLITCH_CHARS = [
   "##",
   "~~",
 ];
-const GLITCH_SHADERS = ["aurora", "velodrome", "keys", "signal", "topology"];
+const GLITCH_SHADERS: readonly string[] = SHADERS;
 const GLITCH_COLORS = ["#ff5f57", "#febc2e", "#28c840", "#00c2a8", "#7ab5e5", "#ff79c6", "#bd93f9"];
 
 const stopGlitch = () => {
@@ -314,7 +314,7 @@ const COMMANDS: Record<
       "  SoundCloud:  play · pause · next · prev",
       "  Shaders:     aurora · velodrome · keys · signal · topology",
       "  Pages:       home · resume · projects · milestones · ama",
-      "               recommendations · stack · gear · loops · skyline",
+      "               recommendations · bookshelf · stack · gear · loops · skyline",
     ],
   },
 
@@ -393,6 +393,7 @@ const COMMANDS: Record<
         projects: "/projects",
         milestones: "/milestones",
         recommendations: "/recommendations",
+        bookshelf: "/bookshelf",
         ama: "/ama",
         stack: "/stack",
         gear: "/gear",
@@ -894,9 +895,9 @@ onUnmounted(() => {
   pointer-events: none;
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.78rem;
-  color: rgba(0, 194, 168, 0.85);
-  background: rgba(10, 14, 20, 0.82);
-  border: 1px solid rgba(0, 194, 168, 0.2);
+  color: rgba(0, 194, 168, 0.9);
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border);
   border-radius: 6px;
   padding: 0.25rem 0.65rem;
   letter-spacing: 0.05em;
@@ -933,33 +934,34 @@ onUnmounted(() => {
   z-index: 9000;
   display: flex;
   flex-direction: column;
-  background: #0a0e14;
+  background: color-mix(in srgb, var(--glass-bg-strong) 62%, #081018);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--glass-shadow);
   font-family: "IBM Plex Mono", "Cascadia Code", "Fira Code", monospace;
   pointer-events: auto;
   overflow: hidden;
 }
 
 .dock-bottom {
-  border-top: 1px solid rgba(0, 194, 168, 0.25);
+  border-top: 1px solid var(--glass-border);
   box-shadow:
-    0 -8px 40px rgba(0, 0, 0, 0.5),
-    0 0 60px rgba(0, 102, 178, 0.06);
+    0 -8px 40px rgba(0, 0, 0, 0.45),
+    var(--glass-shadow);
 }
 
 .dock-right {
-  border-left: 1px solid rgba(0, 194, 168, 0.25);
+  border-left: 1px solid var(--glass-border);
   box-shadow:
-    -8px 0 40px rgba(0, 0, 0, 0.5),
-    0 0 60px rgba(0, 102, 178, 0.06);
+    -8px 0 40px rgba(0, 0, 0, 0.45),
+    var(--glass-shadow);
 }
 
 .dock-float {
-  border: 1px solid rgba(0, 194, 168, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: 10px;
-  box-shadow:
-    0 24px 80px rgba(0, 0, 0, 0.65),
-    0 0 0 1px rgba(0, 102, 178, 0.12),
-    0 0 60px rgba(0, 102, 178, 0.08);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .is-dragging {
@@ -1129,8 +1131,8 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.45rem 0.85rem;
-  background: #0d1117;
-  border-bottom: 1px solid rgba(0, 194, 168, 0.12);
+  background: color-mix(in srgb, var(--glass-bg-strong) 80%, #0b121a);
+  border-bottom: 1px solid var(--glass-border);
   flex-shrink: 0;
   user-select: none;
 }
@@ -1194,9 +1196,9 @@ onUnmounted(() => {
 }
 
 .titlebar-btn {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-control-radius);
   padding: 1px 6px;
   font-size: 0.65rem;
   color: rgba(255, 255, 255, 0.25);
@@ -1209,7 +1211,8 @@ onUnmounted(() => {
 
 .titlebar-btn:hover {
   color: rgba(255, 255, 255, 0.6);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: color-mix(in srgb, var(--glass-border) 72%, white);
+  background: color-mix(in srgb, var(--glass-bg) 85%, transparent);
 }
 
 /* ── Scanlines ──────────────────────────────── */
@@ -1308,6 +1311,12 @@ onUnmounted(() => {
   caret-color: #00c2a8;
   padding: 0;
   line-height: 1.6;
+}
+
+.titlebar-btn:focus-visible,
+.console-input:focus-visible {
+  outline: none;
+  box-shadow: var(--glass-focus-ring);
 }
 
 .console-input::placeholder {
