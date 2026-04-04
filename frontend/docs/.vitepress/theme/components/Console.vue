@@ -460,8 +460,8 @@ const COMMANDS: Record<
     description: "Get contact info",
     fn: () => [
       "  LinkedIn  → linkedin.com/in/stevanussatria",
-      "  GitHub    → github.com/stevanussatria",
-      '  Or type:  chat "hi Steve!"',
+      "  GitHub    → github.com/stevahnes",
+      '  Or type:  chat "How can I contact Steve?"',
     ],
   },
 
