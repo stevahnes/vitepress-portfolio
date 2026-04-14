@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { streamText, tool } from "ai";
+import { stepCountIs, streamText, tool } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { Resend } from "resend";
 import { z } from "zod";
@@ -26,7 +26,7 @@ const sendEmailTool = tool({
   description:
     "Send a message via email to Stevanus on behalf of the visitor. " +
     "Only call this once you have their name, email address, and message.",
-  parameters: z.object({
+  inputSchema: z.object({
     subject: z.string().describe("Subject line for the email"),
     content: z.string().describe("Full message body"),
     senderName: z.string().describe("Full name of the visitor"),
@@ -70,10 +70,10 @@ export async function POST(req: NextRequest) {
     system: SYSTEM_PROMPT,
     messages,
     tools: { send_email: sendEmailTool },
-    maxSteps: 5,
+    stopWhen: stepCountIs(5),
   });
 
-  return result.toDataStreamResponse();
+  return result.toTextStreamResponse();
 }
 
 // ---------------------------------------------------------------------------
