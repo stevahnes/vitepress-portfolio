@@ -89,8 +89,8 @@ Product leader with 7+ years driving growth and innovation in B2B SaaS and consu
 
 ## Core Competencies
 
-SQL • Python • AngularJS • JavaScript • Typescript • Java • HTML • CSS • Git • JIRA • Confluence • ScriptRunner • Figma
-API • Postman • Agile • Scrum • Product specification • Design thinking • Project management • Process automation
+SQL • NodeJS • Angular • Vue • Typescript • HTML • CSS • Git • JIRA • Cursor • Claude Code • Postman • Figma
+API • Agile • Scrum • Product specification • Design thinking • Project management • Process automation
 
 ## Work Experience
 
