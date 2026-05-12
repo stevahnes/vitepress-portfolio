@@ -539,10 +539,6 @@ export default defineConfig({
           link: "/resume#education",
           items: [
             {
-              text: "Kellogg School of Management",
-              link: "/resume#kellogg-school-of-management-northwestern-university",
-            },
-            {
               text: "SUTD",
               link: "/resume#singapore-university-of-technology-and-design",
             },

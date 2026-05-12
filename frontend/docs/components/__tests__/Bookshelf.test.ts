@@ -1,28 +1,26 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { mount, flushPromises, VueWrapper } from "@vue/test-utils";
+import Bookshelf from "../Bookshelf.vue";
 
-const DATA_MODULE = "../../data/bookshelf.json";
-
-async function loadBookshelf(customData?: unknown[]) {
-  vi.resetModules();
-  if (customData) {
-    vi.doMock(DATA_MODULE, () => ({ default: customData }));
-  } else {
-    vi.doUnmock(DATA_MODULE);
-  }
-  const mod = await import("../Bookshelf.vue");
-  return mod.default;
+interface MediaItem {
+  id: string; // e.g., "book-escaping-build-trap"
+  type: "book" | "podcast" | "article";
+  title: string;
+  authorOrHost: string;
+  status: "consuming" | "completed" | "queued";
+  coverImage?: string; // URL or local path
+  link: string; // External link to Spotify, Goodreads, or SG Library (NLB)
 }
+// No more dynamic import/mock machinery — component is now props-driven
 
-async function mountBookshelf(customData?: unknown[]): Promise<VueWrapper> {
-  const Bookshelf = await loadBookshelf(customData);
-  const wrapper = mount(Bookshelf);
+async function mountBookshelf(items?: MediaItem[]): Promise<VueWrapper> {
+  const wrapper = mount(Bookshelf, { props: { items: items } });
   await flushPromises();
   await wrapper.vm.$nextTick();
   return wrapper;
 }
 
-const mixedMediaData = [
+const mixedMediaData: MediaItem[] = [
   {
     id: "book-one",
     type: "book",
@@ -52,8 +50,6 @@ const mixedMediaData = [
 describe("Bookshelf", () => {
   afterEach(() => {
     vi.clearAllMocks();
-    vi.resetModules();
-    vi.doUnmock(DATA_MODULE);
   });
 
   it("renders bookshelf header copy", async () => {
@@ -137,6 +133,11 @@ describe("Bookshelf", () => {
     expect(wrapper.text()).toContain("No media items in this filter yet.");
   });
 
+  it("renders empty state when no props passed", async () => {
+    const wrapper = await mountBookshelf();
+    expect(wrapper.find(".empty-state").exists()).toBe(true);
+  });
+
   it("filters out invalid data rows via MediaItem type guard", async () => {
     const custom = [
       {
@@ -154,7 +155,7 @@ describe("Bookshelf", () => {
       },
     ];
 
-    const wrapper = await mountBookshelf(custom);
+    const wrapper = await mountBookshelf(custom as MediaItem[]);
     const cards = wrapper.findAll(".media-card");
     expect(cards).toHaveLength(1);
     expect(wrapper.text()).toContain("Valid Book");

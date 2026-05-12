@@ -3,7 +3,7 @@ outline: false
 prev: false
 next: false
 title: "Resume"
-description: "Download Stevanus Satria's professional resume. Product Leader with 7+ years of experience in B2B SaaS, product management, and software engineering."
+description: "Download Stevanus Satria's professional resume. Product Manager with 8+ years of experience in B2B SaaS, product management, and software engineering."
 keywords: "Stevanus Satria resume, product manager resume, Workato, Shopee, Amadeus, software engineer, B2B SaaS, Singapore, Kellogg, SUTD"
 author: "Stevanus Satria"
 head:
@@ -12,7 +12,7 @@ head:
       content: "Resume"
   - - meta
     - property: og:description
-      content: "Download Stevanus Satria's professional resume. Product Leader with 7+ years of experience in B2B SaaS, product management, and software engineering."
+      content: "Download Stevanus Satria's professional resume. Product Manager with 8+ years of experience in B2B SaaS, product management, and software engineering."
   - - meta
     - property: og:type
       content: profile
@@ -85,7 +85,7 @@ const DownloadResumeButton = defineAsyncComponent({
 
 ## Personal Profile
 
-Product leader with 7+ years driving growth and innovation in B2B SaaS and consumer products across orchestration, e-commerce, and aviation industries. Proven track record in launching revenue-generating features, modernizing legacy systems, and leading large-scale customer migrations. Skilled in balancing usability, performance, and security while guiding cross-functional teams from vision to execution. Certified Scrum Product Owner, ScrumMaster, and Usability Analyst, with hands-on experience building AI-powered products, architecting scalable systems, and integrating APIs to drive customer impact. Fluent in English, Indonesian, and Malay, with conversational Chinese.
+Product Manager with 8+ years driving growth and innovation in B2B SaaS and consumer products across orchestration, e-commerce, and aviation industries. Proven track record in launching revenue-generating features, modernizing legacy systems, and leading large-scale customer migrations. Skilled in balancing usability, performance, and security while guiding cross-functional teams from vision to execution. Certified Scrum Product Owner, ScrumMaster, and Usability Analyst, with hands-on experience building AI-powered products, architecting scalable systems, and integrating APIs to drive customer impact. Fluent in English, Indonesian, and Malay, with conversational Chinese.
 
 ## Core Competencies
 
