@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useData } from "vitepress";
-import bookshelfData from "../data/bookshelf.json";
 
 interface MediaItem {
   id: string; // e.g., "book-escaping-build-trap"
@@ -12,6 +11,14 @@ interface MediaItem {
   coverImage?: string; // URL or local path
   link: string; // External link to Spotify, Goodreads, or SG Library (NLB)
 }
+
+interface Props {
+  items?: MediaItem[];
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  items: () => [],
+});
 
 type MediaFilter = "all" | MediaItem["type"];
 type SortKey = "status" | "title" | "author";
@@ -62,8 +69,8 @@ const cssVars = computed(() => ({
 }));
 
 const items = computed<MediaItem[]>(() => {
-  if (!Array.isArray(bookshelfData)) return [];
-  return bookshelfData.filter(isMediaItem);
+  if (!Array.isArray(props.items)) return [];
+  return props.items.filter(isMediaItem);
 });
 
 const filteredItems = computed(() => {
