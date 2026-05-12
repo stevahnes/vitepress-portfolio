@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
   const { messages } = await req.json();
 
   const result = streamText({
-    model: openai("gpt-5-mini"),
+    model: openai("gpt-5.4-mini"),
     system: SYSTEM_PROMPT,
     messages,
     tools: { send_email: sendEmailTool },
