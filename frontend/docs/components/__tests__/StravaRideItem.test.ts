@@ -558,7 +558,7 @@ describe("StravaRideItem", () => {
     // so polyline is conditional on isMapReady — trigger ready via vm
     const vm = wrapper.vm as unknown as { isMapReady: boolean };
     vm.isMapReady = true;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".stub-LPolyline").exists()).toBe(true);
   });
 
@@ -567,7 +567,7 @@ describe("StravaRideItem", () => {
     const vm = wrapper.vm as unknown as { isMapReady: boolean; isLeafletLoaded: boolean };
     vm.isMapReady = true;
     vm.isLeafletLoaded = true;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     // LMarker stubs rendered (start + end)
     const markers = wrapper.findAll(".stub-LMarker");
     expect(markers.length).toBeGreaterThanOrEqual(1);
@@ -578,7 +578,7 @@ describe("StravaRideItem", () => {
     const vm = wrapper.vm as unknown as { isMapReady: boolean; isLeafletLoaded: boolean };
     vm.isMapReady = true;
     vm.isLeafletLoaded = true;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     const markers = wrapper.findAll(".stub-LMarker");
     expect(markers.length).toBe(2); // start + end
   });
@@ -590,7 +590,7 @@ describe("StravaRideItem", () => {
     const vm = wrapper.vm as unknown as { isMapReady: boolean; isLeafletLoaded: boolean };
     vm.isMapReady = true;
     vm.isLeafletLoaded = true;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     const markers = wrapper.findAll(".stub-LMarker");
     // Only start marker rendered
     expect(markers.length).toBe(1);
@@ -603,7 +603,7 @@ describe("StravaRideItem", () => {
     const vm = wrapper.vm as unknown as { isMapReady: boolean; isLeafletLoaded: boolean };
     vm.isMapReady = true;
     vm.isLeafletLoaded = true;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     const markers = wrapper.findAll(".stub-LMarker");
     // Only end marker rendered
     expect(markers.length).toBe(1);
@@ -644,7 +644,7 @@ describe("StravaRideItem", () => {
     };
 
     await vm.onMapReady();
-    await wrapper.vm.$nextTick();
+    await flushPromises();
 
     expect(vm.isMapReady).toBe(true);
     expect(vm.mapRef.leafletObject.setMinZoom).toHaveBeenCalledWith(3);

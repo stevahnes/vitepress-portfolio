@@ -16,7 +16,6 @@ interface MediaItem {
 async function mountBookshelf(items?: MediaItem[]): Promise<VueWrapper> {
   const wrapper = mount(Bookshelf, { props: { items: items } });
   await flushPromises();
-  await wrapper.vm.$nextTick();
   return wrapper;
 }
 
@@ -74,7 +73,7 @@ describe("Bookshelf", () => {
     const wrapper = await mountBookshelf(mixedMediaData);
     const sortButtons = wrapper.findAll("button.sort-button");
     await sortButtons[1].trigger("click"); // Title
-    await wrapper.vm.$nextTick();
+    await flushPromises();
 
     const titles = wrapper.findAll(".media-card .media-title").map(el => el.text());
     expect(titles).toEqual(["Alpha Podcast", "Middle Article", "Zoo Book"]);
@@ -84,7 +83,7 @@ describe("Bookshelf", () => {
     const wrapper = await mountBookshelf(mixedMediaData);
     const sortButtons = wrapper.findAll("button.sort-button");
     await sortButtons[2].trigger("click"); // Author
-    await wrapper.vm.$nextTick();
+    await flushPromises();
 
     const titles = wrapper.findAll(".media-card .media-title").map(el => el.text());
     expect(titles).toEqual(["Zoo Book", "Alpha Podcast", "Middle Article"]);
@@ -101,15 +100,15 @@ describe("Bookshelf", () => {
     const wrapper = await mountBookshelf(mixedMediaData);
 
     await wrapper.findAll("button.filter-button")[1].trigger("click"); // Books
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.findAll(".media-card")).toHaveLength(1);
 
     await wrapper.findAll("button.filter-button")[2].trigger("click"); // Podcasts
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.findAll(".media-card")).toHaveLength(1);
 
     await wrapper.findAll("button.filter-button")[3].trigger("click"); // Articles
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.findAll(".media-card")).toHaveLength(1);
   });
 
