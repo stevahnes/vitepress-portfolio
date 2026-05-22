@@ -43,7 +43,6 @@ describe("StravaRideVisualizer", () => {
       props: { activities: [] },
     });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("No ride data available");
   });
 
@@ -54,7 +53,6 @@ describe("StravaRideVisualizer", () => {
       props: { activities },
     });
     await flushPromises();
-    await wrapper.vm.$nextTick();
 
     const items = wrapper.findAll(".strava-ride-stub");
     expect(items).toHaveLength(2);
@@ -68,7 +66,6 @@ describe("StravaRideVisualizer", () => {
       props: { activity: sampleActivity },
     });
     await flushPromises();
-    await wrapper.vm.$nextTick();
 
     const items = wrapper.findAll(".strava-ride-stub");
     expect(items).toHaveLength(1);
@@ -80,7 +77,6 @@ describe("StravaRideVisualizer", () => {
       props: { activities: [sampleActivity], height: "800px" },
     });
     await flushPromises();
-    await wrapper.vm.$nextTick();
 
     const item = wrapper.findComponent(StravaRideItemStub);
     expect(item.props("mapHeight")).toBe("800px");

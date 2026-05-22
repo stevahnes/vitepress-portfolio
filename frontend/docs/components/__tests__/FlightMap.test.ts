@@ -75,7 +75,6 @@ const transFlightsSINtoSFO = [
 const mountMap = async (props = {}) => {
   const wrapper = mount(FlightMap, { props: { flights: sampleFlights, ...props } });
   await flushPromises();
-  await wrapper.vm.$nextTick();
   return wrapper;
 };
 
@@ -129,7 +128,6 @@ describe("FlightMap", () => {
   it("handles empty flights gracefully", async () => {
     const wrapper = mount(FlightMap, { props: { flights: [] } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.find(".flight-map-container").exists()).toBe(true);
   });
 
@@ -153,7 +151,6 @@ describe("FlightMap", () => {
   it("shows 0 stats for empty flights", async () => {
     const wrapper = mount(FlightMap, { props: { flights: [] } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("0");
   });
 
@@ -163,7 +160,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "CGK"), makeFlight("SIN", "CGK"), makeFlight("SIN", "CGK")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("1"); // unique routes
     expect(wrapper.text()).toContain("3"); // total flights
   });
@@ -172,7 +168,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "CGK"), makeFlight("CGK", "SIN")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain("1");
   });
 
@@ -187,7 +182,6 @@ describe("FlightMap", () => {
     ];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { routes: Array<{ opacity: number; from: string }> };
     const cgkRoute = vm.routes.find(r => r.from === "SIN");
     expect(cgkRoute).toBeDefined();
@@ -205,7 +199,6 @@ describe("FlightMap", () => {
     ];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { routes: Array<{ opacity: number; count: number }> };
     const singleRoute = vm.routes.find(r => r.count === 1);
     expect(singleRoute).toBeDefined();
@@ -219,7 +212,6 @@ describe("FlightMap", () => {
     const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.find(".flight-map-container").exists()).toBe(true);
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("XXX"));
     consoleSpy.mockRestore();
@@ -230,7 +222,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("ZZZ", "CGK")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.find(".flight-map-container").exists()).toBe(true);
     consoleSpy.mockRestore();
   });
@@ -240,7 +231,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "ZZZ")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.find(".flight-map-container").exists()).toBe(true);
     consoleSpy.mockRestore();
   });
@@ -250,7 +240,6 @@ describe("FlightMap", () => {
   it("handles trans-Pacific routes (SIN→SFO) without crashing", async () => {
     const wrapper = mount(FlightMap, { props: { flights: transFlightsSINtoSFO } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     expect(wrapper.find(".flight-map-container").exists()).toBe(true);
   });
 
@@ -260,7 +249,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("LAX", "ICN")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { routes: Array<{ coordinates: [number, number][] }> };
     expect(vm.routes[0].coordinates.length).toBeGreaterThan(0);
   });
@@ -272,7 +260,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "SFO")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { routes: Array<{ coordinates: [number, number][] }> };
     expect(vm.routes[0].coordinates.length).toBeGreaterThan(0);
   });
@@ -281,7 +268,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("BLR", "MAA")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { routes: Array<{ coordinates: [number, number][] }> };
     // Short routes return just two points
     expect(vm.routes[0].coordinates.length).toBeGreaterThanOrEqual(2);
@@ -291,7 +277,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "NRT")]; // SIN to Tokyo ~5000km
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { routes: Array<{ coordinates: [number, number][] }> };
     expect(vm.routes[0].coordinates.length).toBeGreaterThan(2);
   });
@@ -301,7 +286,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("BOS", "GRU")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { routes: Array<{ coordinates: [number, number][] }> };
     expect(vm.routes[0].coordinates.length).toBeGreaterThan(0);
   });
@@ -318,7 +302,7 @@ describe("FlightMap", () => {
     // Force isZooming=true and low zoom to trigger the performance branch
     vm.isZooming = true;
     vm.currentZoom = 2;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     // All returned routes should have count > 1
     vm.simplifiedRoutes.forEach(r => expect(r.count).toBeGreaterThan(1));
   });
@@ -333,7 +317,7 @@ describe("FlightMap", () => {
     };
     vm.isZooming = false;
     vm.currentZoom = 5;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(vm.simplifiedRoutes.length).toBe(vm.routes.length);
   });
 
@@ -348,7 +332,7 @@ describe("FlightMap", () => {
       makeFlight("SIN", "ICN"),
       makeFlight("NRT", "SFO"),
       makeFlight("NRT", "LAX"),
-      makeFlight("DXB", "LHR" as unknown as string),
+      makeFlight("DXB", "LHR"),
       makeFlight("FRA", "CDG"),
       makeFlight("AMS", "MUC"),
       makeFlight("FCO", "IST"),
@@ -389,14 +373,13 @@ describe("FlightMap", () => {
 
     const wrapper = mount(FlightMap, { props: { flights: manyFlights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
 
     const vm = wrapper.vm as unknown as {
       isZooming: boolean;
       simplifiedAirports: Array<{ flightCount: number }>;
     };
     vm.isZooming = true;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
 
     // When isZooming, only airports with flightCount > 2 and slice to 15
     vm.simplifiedAirports.forEach(a => expect(a.flightCount).toBeGreaterThan(2));
@@ -412,7 +395,7 @@ describe("FlightMap", () => {
     };
     vm.isZooming = false;
     vm.currentZoom = 2; // triggers minFlightCount=3, maxAirports=20
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(vm.simplifiedAirports.length).toBeLessThanOrEqual(20);
   });
 
@@ -426,7 +409,7 @@ describe("FlightMap", () => {
     };
     vm.isZooming = false;
     vm.currentZoom = 5;
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     // maxAirports=Infinity and minFlightCount=0 → all airports returned
     expect(vm.simplifiedAirports.length).toBe(vm.airports.length);
   });
@@ -447,7 +430,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "SFO"), makeFlight("SIN", "LAX")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as {
       airports: Array<{ code: string; lng: number }>;
     };
@@ -460,7 +442,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "CGK"), makeFlight("SIN", "BKK")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { airports: Array<{ code: string }> };
     const wrapped = vm.airports.filter(a => a.code.includes("-wrapped"));
     expect(wrapped.length).toBe(0);
@@ -471,7 +452,6 @@ describe("FlightMap", () => {
     const flights = [makeFlight("SIN", "SFO")];
     const wrapper = mount(FlightMap, { props: { flights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as {
       airports: Array<{ code: string; lng: number }>;
       mapBounds: [[number, number], [number, number]] | null;
@@ -489,7 +469,6 @@ describe("FlightMap", () => {
   it("airports computed is empty for empty flights", async () => {
     const wrapper = mount(FlightMap, { props: { flights: [] } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { airports: Array<unknown> };
     expect(vm.airports).toHaveLength(0);
   });
@@ -499,7 +478,6 @@ describe("FlightMap", () => {
   it("returns null mapBounds for empty flights", async () => {
     const wrapper = mount(FlightMap, { props: { flights: [] } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as {
       mapBounds: [[number, number], [number, number]] | null;
     };
@@ -522,7 +500,6 @@ describe("FlightMap", () => {
   it("handles trans-Pacific mapBounds with wrapped longitude", async () => {
     const wrapper = mount(FlightMap, { props: { flights: transFlightsSINtoSFO } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as {
       mapBounds: [[number, number], [number, number]] | null;
     };
@@ -551,7 +528,6 @@ describe("FlightMap", () => {
   it("statistics returns zeros for empty flights", async () => {
     const wrapper = mount(FlightMap, { props: { flights: [] } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as {
       statistics: {
         totalFlights: number;
@@ -721,7 +697,7 @@ describe("FlightMap", () => {
       coordinates: [],
       opacity: 0.5,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-content").text()).toContain("08:30");
   });
 
@@ -742,7 +718,7 @@ describe("FlightMap", () => {
       ],
       opacity: 0.9,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-overlay").exists()).toBe(true);
   });
 
@@ -761,7 +737,7 @@ describe("FlightMap", () => {
       ],
       opacity: 0.5,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     const modal = wrapper.find(".modal-content");
     expect(modal.text()).toContain("SIN");
     expect(modal.text()).toContain("CGK");
@@ -779,9 +755,9 @@ describe("FlightMap", () => {
       coordinates: [],
       opacity: 0.5,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     await wrapper.find(".modal-overlay").trigger("click");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-overlay").exists()).toBe(false);
   });
 
@@ -797,9 +773,9 @@ describe("FlightMap", () => {
       coordinates: [],
       opacity: 0.5,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     await wrapper.find(".modal-content button").trigger("click");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-overlay").exists()).toBe(false);
   });
 
@@ -815,9 +791,9 @@ describe("FlightMap", () => {
       coordinates: [],
       opacity: 0.5,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     await wrapper.find(".modal-content").trigger("click");
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-overlay").exists()).toBe(true);
   });
 
@@ -833,7 +809,7 @@ describe("FlightMap", () => {
       coordinates: [],
       opacity: 0.5,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-content").text()).toContain("Singapore");
   });
 
@@ -843,7 +819,6 @@ describe("FlightMap", () => {
     const manyFlights = Array.from({ length: 12 }, () => makeFlight("SIN", "CGK"));
     const wrapper = mount(FlightMap, { props: { flights: manyFlights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { handleRouteClick: (r: object) => void };
     vm.handleRouteClick({
       key: "SIN-CGK",
@@ -854,7 +829,7 @@ describe("FlightMap", () => {
       coordinates: [],
       opacity: 1,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-content").text()).toContain("more flights");
   });
 
@@ -862,7 +837,6 @@ describe("FlightMap", () => {
     const tenFlights = Array.from({ length: 10 }, () => makeFlight("SIN", "CGK"));
     const wrapper = mount(FlightMap, { props: { flights: tenFlights } });
     await flushPromises();
-    await wrapper.vm.$nextTick();
     const vm = wrapper.vm as unknown as { handleRouteClick: (r: object) => void };
     vm.handleRouteClick({
       key: "SIN-CGK",
@@ -873,7 +847,7 @@ describe("FlightMap", () => {
       coordinates: [],
       opacity: 1,
     });
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(wrapper.find(".modal-content").text()).not.toContain("more flights");
   });
 
@@ -891,7 +865,7 @@ describe("FlightMap", () => {
       isStatsPanelCollapsed: boolean;
     };
     vm.toggleStatsPanel();
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(vm.isStatsPanelCollapsed).toBe(true);
   });
 
@@ -903,7 +877,7 @@ describe("FlightMap", () => {
     };
     vm.toggleStatsPanel();
     vm.toggleStatsPanel();
-    await wrapper.vm.$nextTick();
+    await flushPromises();
     expect(vm.isStatsPanelCollapsed).toBe(false);
   });
 
