@@ -59,9 +59,6 @@ import { defineAsyncComponent } from 'vue'
 const ContactChatLink = defineAsyncComponent(() => 
   import('./components/ContactChatLink.vue')
 )
-const CompanyCarousel = defineAsyncComponent(() => 
-  import('./components/CompanyCarousel.vue')
-)
 
 onMounted(() => {
   const chatButton = document.querySelector('a[href="#chat"]')
@@ -80,14 +77,6 @@ onMounted(() => {
   }
 })
 </script>
-
-<CompanyCarousel
-  :companies="[
-    { name: 'Airwallex', logo: '/logos/airwallex.svg', url: 'https://airwallex.com' },
-    { name: 'Workato',   logo: '/logos/workato.svg',   url: 'https://workato.com' },
-  ]"
-  :speed="32"
-/>
 
 ## Hi, I'm Steve 👋
 
