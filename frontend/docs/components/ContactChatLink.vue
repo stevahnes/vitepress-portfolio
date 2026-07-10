@@ -17,6 +17,10 @@ interface Props {
   ariaLabel?: string;
 }
 
+interface ChatEventDetail {
+  message: string;
+}
+
 const props = withDefaults(defineProps<Props>(), {
   message: "How can I contact Steve?",
   linkClass: "text-blue-600 hover:text-blue-800 underline",
@@ -25,9 +29,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const activateChat = (): void => {
   if (typeof window !== "undefined") {
+    const message = props.message ?? "";
+
     window.dispatchEvent(
-      new CustomEvent("activateChat", {
-        detail: { message: props.message },
+      new CustomEvent<ChatEventDetail>("activateChat", {
+        detail: { message },
       }),
     );
   }
