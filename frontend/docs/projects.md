@@ -23,6 +23,12 @@ head:
 
 features:
   - icon:
+      src: /plate.webp
+      alt: AI meal tracker to keep my macros in check
+    title: Plate
+    details: AI meal tracker to keep my macros in check
+    link: https://github.com/stevahnes/meal-tracker
+  - icon:
       src: /3d-printing.webp
       alt: Rediscovering my love for hardware design and prototyping
     title: Vulcan's Fixes
