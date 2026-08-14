@@ -40,6 +40,9 @@ features:
   - icon: { dark: "./bvlgari-dark.webp", light: "./bvlgari-light.webp" }
     title: Colosseo
     details: Bvlgari B.zero1 Ring
+  - icon: { dark: "./coach-dark.webp", light: "./coach-light.webp" }
+    title: Mori
+    details: Coach Mott 38 in Loved Leather
   - icon: { dark: "./gucci-dark.webp", light: "./gucci-light.webp" }
     title: Tribal
     details: Gucci Interlocking Chain Bracelet

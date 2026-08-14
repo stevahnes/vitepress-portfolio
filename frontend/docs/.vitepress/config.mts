@@ -6,7 +6,7 @@ import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 export default defineConfig({
   title: "Stevanus Satria",
   description:
-    "Stevanus Satria is a Senior Product Manager at Airwallex with 7+ years of experience in B2B SaaS, fintech, frontend development, and product management. Explore his projects, experience, and professional journey.",
+    "Stevanus Satria is a Senior Product Manager at Airwallex with 8+ years of experience in B2B SaaS, fintech, frontend development, and product management. Explore his projects, experience, and professional journey.",
   lang: "en-US",
   head: [
     // Favicon
@@ -60,7 +60,7 @@ export default defineConfig({
       {
         property: "og:description",
         content:
-          "Senior Product Manager at Airwallex with 7+ years of experience in B2B SaaS, fintech, frontend development, and product management.",
+          "Senior Product Manager at Airwallex with 8+ years of experience in B2B SaaS, fintech, frontend development, and product management.",
       },
     ],
     ["meta", { property: "og:image", content: "https://stevanussatria.com/me.webp" }],
@@ -80,7 +80,7 @@ export default defineConfig({
       {
         name: "twitter:description",
         content:
-          "Senior Product Manager at Airwallex with 7+ years of experience in B2B SaaS, fintech, frontend development, and product management.",
+          "Senior Product Manager at Airwallex with 8+ years of experience in B2B SaaS, fintech, frontend development, and product management.",
       },
     ],
     ["meta", { name: "twitter:image", content: "https://stevanussatria.com/me.webp" }],
@@ -131,7 +131,7 @@ export default defineConfig({
             name: "Workato",
           },
           description:
-            "Senior Product Manager with 7+ years of experience in B2B SaaS, frontend development, and product management",
+            "Senior Product Manager with 8+ years of experience in B2B SaaS, frontend development, and product management",
           url: "https://stevanussatria.com",
           image: "https://stevanussatria.com/me.webp",
           sameAs: [

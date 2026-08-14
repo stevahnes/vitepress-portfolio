@@ -1,7 +1,7 @@
 ---
 layout: home
 title: "Home"
-description: "Welcome to Stevanus Satria's portfolio. Senior Product Manager at Airwallex with 7+ years of experience in B2B SaaS, product management, and frontend development. Chat with Advocado, my AI assistant!"
+description: "Welcome to Stevanus Satria's portfolio. Senior Product Manager at Airwallex with 8+ years of experience in B2B SaaS, product management, and frontend development. Chat with Advocado, my AI assistant!"
 keywords: "Stevanus Satria, product manager, software engineer, Workato, Airwallex, B2B SaaS, frontend developer, Singapore, portfolio"
 author: "Stevanus Satria"
 head:
@@ -10,7 +10,7 @@ head:
       content: "Home"
   - - meta
     - property: og:description
-      content: "Welcome to Stevanus Satria's portfolio. Senior Product Manager at Airwallex with 7+ years of experience in B2B SaaS, product management, and frontend development. Chat with Advocado, my AI assistant!"
+      content: "Welcome to Stevanus Satria's portfolio. Senior Product Manager at Airwallex with 8+ years of experience in B2B SaaS, product management, and frontend development. Chat with Advocado, my AI assistant!"
   - - meta
     - property: og:type
       content: website
@@ -22,7 +22,7 @@ head:
       content: "Home"
   - - meta
     - name: twitter:description
-      content: "Welcome to Stevanus Satria's portfolio. Senior Product Manager at Airwallex with 7+ years of experience in B2B SaaS, product management, and frontend development. Chat with Advocado, my AI assistant!"
+      content: "Welcome to Stevanus Satria's portfolio. Senior Product Manager at Airwallex with 8+ years of experience in B2B SaaS, product management, and frontend development. Chat with Advocado, my AI assistant!"
   - - meta
     - name: twitter:card
       content: summary_large_image
