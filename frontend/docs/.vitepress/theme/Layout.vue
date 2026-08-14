@@ -8,6 +8,7 @@ const UnifiedChat = defineAsyncComponent(() => import("./components/Chat.vue"));
 const ShaderBackground = defineAsyncComponent(() => import("./components/ShaderBackground.vue"));
 const Console = defineAsyncComponent(() => import("./components/Console.vue"));
 const GlitchHint = defineAsyncComponent(() => import("./components/GlitchHint.vue"));
+const CompanyCarousel = defineAsyncComponent(() => import("./components/CompanyCarousel.vue"));
 
 const { page } = useData();
 const isHome = computed(() => page.value.relativePath === "index.md");
@@ -17,6 +18,9 @@ const isHome = computed(() => page.value.relativePath === "index.md");
   <DefaultTheme.Layout>
     <template #home-hero-before>
       <ShaderBackground v-if="isHome" />
+    </template>
+    <template #home-features-after>
+      <CompanyCarousel v-if="isHome" />
     </template>
     <template #layout-bottom>
       <FloatingMusicPlayer
