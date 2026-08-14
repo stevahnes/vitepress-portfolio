@@ -171,10 +171,10 @@ describe("CompanyCarousel", () => {
     expect(unsized.attributes("style")).toBeUndefined();
   });
 
-  it("falls back to the shipped company list when none is passed", () => {
+  it("doesn not render when no company is passed", () => {
     const wrapper = mount(CompanyCarousel);
 
     expect(wrapper.find(".company-carousel").exists()).toBe(true);
-    expect(wrapper.find(".marquee-group").text()).toContain("Airwallex");
+    expect(wrapper.find(".marquee-group").text()).toBe("");
   });
 });
