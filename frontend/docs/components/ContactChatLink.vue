@@ -29,7 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const activateChat = (): void => {
   if (typeof window !== "undefined") {
-    const message = props.message ?? "";
+    const message: string = props.message ?? "";
 
     window.dispatchEvent(
       new CustomEvent<ChatEventDetail>("activateChat", {
