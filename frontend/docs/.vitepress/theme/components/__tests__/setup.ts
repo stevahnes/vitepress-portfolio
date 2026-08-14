@@ -18,6 +18,8 @@ vi.mock("vitepress", () => ({
     route: ref({ path: "/" }),
     go: vi.fn().mockResolvedValue(undefined),
   }),
+  // Mirrors real behaviour when no `base` is configured in config.mts.
+  withBase: (path: string) => path,
 }));
 
 config.global.stubs = {
