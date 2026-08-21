@@ -92,7 +92,7 @@ export const companies: Company[] = [
     id: "better-sg",
     name: "better.sg",
     href: "https://better.sg",
-    logo: "/bettersg.webp",
+    logo: { dark: "/bettersg-dark.webp", light: "/bettersg-light.webp" },
     logoHeight: 1.44,
   },
 ];
