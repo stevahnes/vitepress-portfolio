@@ -45,11 +45,11 @@ hero:
       link: /resume?auto=true
 
 features:
-  - title: ⌛ 7+
+  - title: ⌛ 8+
     details: Years of Experience
-  - title: 💼 B2B
+  - title: 💸 Fintech
     details: Primary Domain Expertise
-  - title: 🌐 SaaS
+  - title: ☁️ SaaS/Cloud
     details: Primary Architecture Expertise
 ---
 
